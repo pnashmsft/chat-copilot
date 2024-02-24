@@ -1,16 +1,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useIsAuthenticated, useMsal } from '@azure/msal-react';
-import { FluentProvider, Subtitle1, makeStyles, shorthands, tokens } from '@fluentui/react-components';
+import { FluentProvider, makeStyles, shorthands, tokens } from '@fluentui/react-components';
 
 import * as React from 'react';
 import { useEffect } from 'react';
+
+import logo from './assets/frontend-icons/VA.png';
 import { UserSettingsMenu } from './components/header/UserSettingsMenu';
 import { PluginGallery } from './components/open-api-plugins/PluginGallery';
 import { BackendProbe, ChatView, Error, Loading, Login } from './components/views';
 import { AuthHelper } from './libs/auth/AuthHelper';
 import { useChat, useFile } from './libs/hooks';
 import { AlertType } from './libs/models/AlertType';
+import { HeaderBackgroundColor, HeaderTitle, HeaderTitleColor } from './libs/services/BaseService';
 import { useAppDispatch, useAppSelector } from './redux/app/hooks';
 import { RootState } from './redux/app/store';
 import { FeatureKeys } from './redux/features/app/AppState';
@@ -69,6 +72,8 @@ const App = () => {
 
     const chat = useChat();
     const file = useFile();
+
+    if (logo) null;
 
     useEffect(() => {
         if (isMaintenance && appState !== AppState.ProbeForBackend) {
@@ -141,9 +146,17 @@ const App = () => {
                 <>
                     <UnauthenticatedTemplate>
                         <div className={classes.container}>
-                            <div className={classes.header}>
-                                <Subtitle1 as="h1">Chat Copilot</Subtitle1>
-                            </div>
+                            <h1
+                                style={{
+                                    color: HeaderTitleColor,
+                                    background: HeaderBackgroundColor,
+                                    fontSize: 24,
+                                    paddingBottom: 5,
+                                }}
+                            >
+                                <img width="120" height="120" aria-label="Header Logo" src={logo}></img>
+                                <a>{HeaderTitle}</a>
+                            </h1>
                             {appState === AppState.SigningOut && <Loading text="Signing you out..." />}
                             {appState !== AppState.SigningOut && <Login />}
                         </div>
@@ -177,21 +190,22 @@ const Chat = ({
     }, [setAppState]);
     return (
         <div className={classes.container}>
-            <div className={classes.header}>
-                <Subtitle1 as="h1">Chat Copilot</Subtitle1>
-                {appState > AppState.SettingUserInfo && (
+            <h1 style={{ color: HeaderTitleColor, background: HeaderBackgroundColor, fontSize: 24, paddingBottom: 5 }}>
+                <img width="120" height="120" aria-label="Header Logo" src={logo}></img>
+                <a>{HeaderTitle}</a>
+            </h1>
+            {appState > AppState.SettingUserInfo && (
+                <div className={classes.cornerItems}>
                     <div className={classes.cornerItems}>
-                        <div className={classes.cornerItems}>
-                            <PluginGallery />
-                            <UserSettingsMenu
-                                setLoadingState={() => {
-                                    setAppState(AppState.SigningOut);
-                                }}
-                            />
-                        </div>
+                        <PluginGallery />
+                        <UserSettingsMenu
+                            setLoadingState={() => {
+                                setAppState(AppState.SigningOut);
+                            }}
+                        />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
             {appState === AppState.ProbeForBackend && <BackendProbe onBackendFound={onBackendFound} />}
             {appState === AppState.SettingUserInfo && (
                 <Loading text={'Hang tight while we fetch your information...'} />
