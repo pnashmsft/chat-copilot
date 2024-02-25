@@ -6,7 +6,7 @@ import { FluentProvider, makeStyles, shorthands, tokens } from '@fluentui/react-
 import * as React from 'react';
 import { useEffect } from 'react';
 
-import logo from './assets/frontend-icons/VA.png';
+import logo from './assets/frontend-icons/FullVALogo.png';
 import { UserSettingsMenu } from './components/header/UserSettingsMenu';
 import { PluginGallery } from './components/open-api-plugins/PluginGallery';
 import { BackendProbe, ChatView, Error, Loading, Login } from './components/views';
@@ -152,10 +152,13 @@ const App = () => {
                                     background: HeaderBackgroundColor,
                                     fontSize: 24,
                                     paddingBottom: 5,
+                                    display: 'table',
                                 }}
                             >
-                                <img width="120" height="120" aria-label="Header Logo" src={logo}></img>
-                                <a>{HeaderTitle}</a>
+                                <img width="400" height="80" aria-label="Header Logo" src={logo}></img>
+                                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '57%' }}>
+                                    {HeaderTitle}
+                                </div>
                             </h1>
                             {appState === AppState.SigningOut && <Loading text="Signing you out..." />}
                             {appState !== AppState.SigningOut && <Login />}
@@ -190,9 +193,17 @@ const Chat = ({
     }, [setAppState]);
     return (
         <div className={classes.container}>
-            <h1 style={{ color: HeaderTitleColor, background: HeaderBackgroundColor, fontSize: 24, paddingBottom: 5 }}>
-                <img width="120" height="120" aria-label="Header Logo" src={logo}></img>
-                <a>{HeaderTitle}</a>
+            <h1
+                style={{
+                    color: HeaderTitleColor,
+                    background: HeaderBackgroundColor,
+                    fontSize: 24,
+                    paddingBottom: 5,
+                    display: 'table',
+                }}
+            >
+                <img width="400" height="80" aria-label="Header Logo" src={logo}></img>
+                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '57%' }}>{HeaderTitle}</div>
             </h1>
             {appState > AppState.SettingUserInfo && (
                 <div className={classes.cornerItems}>

@@ -32,6 +32,7 @@ export const HeaderBackgroundColor =
     process.env.REACT_APP_HEADER_BACKGROUND_COLOR == null || process.env.REACT_APP_HEADER_BACKGROUND_COLOR.trim() === ''
         ? 'darkblue'
         : process.env.REACT_APP_HEADER_BACKGROUND_COLOR;
+export const DocumentUploadEnabled = process.env.REACT_APP_DOC_UPLOAD_ENABLED ?? false;
 export const NetworkErrorMessage = '\n\nPlease check that your backend is running and that it is accessible by the app';
 
 export class BaseService {

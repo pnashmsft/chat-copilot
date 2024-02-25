@@ -42,6 +42,7 @@ import { useRef } from 'react';
 import { Constants } from '../../../Constants';
 import { useChat, useFile } from '../../../libs/hooks';
 import { ChatMemorySource } from '../../../libs/models/ChatMemorySource';
+import { DocumentUploadEnabled } from '../../../libs/services/BaseService';
 import { useAppSelector } from '../../../redux/app/hooks';
 import { RootState } from '../../../redux/app/store';
 import { Add20 } from '../../shared/BundledIcons';
@@ -163,6 +164,7 @@ export const DocumentsTab: React.FC = () => {
                                 className={classes.uploadButton}
                                 icon={<DocumentArrowUp20Regular />}
                                 disabled={
+                                    DocumentUploadEnabled != 'true' ||
                                     conversations[selectedId].disabled ||
                                     (importingDocuments && importingDocuments.length > 0)
                                 }
