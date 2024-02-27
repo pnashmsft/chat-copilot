@@ -13,6 +13,7 @@ import {
     Tooltip,
 } from '@fluentui/react-components';
 import { useChat } from '../../../../libs/hooks';
+import { CreateNewChat } from '../../../../libs/services/BaseService';
 import { useAppSelector } from '../../../../redux/app/hooks';
 import { RootState } from '../../../../redux/app/store';
 import { FeatureKeys } from '../../../../redux/features/app/AppState';
@@ -47,7 +48,13 @@ export const SimplifiedNewBotMenu: FC<SimplifiedNewBotMenuProps> = () => {
             <Menu>
                 <MenuTrigger disableButtonEnhancement>
                     <Tooltip content="Add a chat" relationship="label">
-                        <Button data-testid="createNewConversationButton" icon={<Add20 />} appearance="transparent" />
+                        <Button
+                            data-testid="createNewConversationButton"
+                            hidden={CreateNewChat != 'true'}
+                            disabled={CreateNewChat != 'true'}
+                            icon={<Add20 />}
+                            appearance="transparent"
+                        />
                     </Tooltip>
                 </MenuTrigger>
                 <MenuPopover>

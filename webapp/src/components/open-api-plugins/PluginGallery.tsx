@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { usePlugins } from '../../libs/hooks';
 import { AlertType } from '../../libs/models/AlertType';
+import { HeaderPluginsEnabled } from '../../libs/services/BaseService';
 import { useAppSelector } from '../../redux/app/hooks';
 import { RootState } from '../../redux/app/store';
 import { addAlert } from '../../redux/features/app/appSlice';
@@ -115,6 +116,7 @@ export const PluginGallery: React.FC = () => {
             <DialogTrigger>
                 <Button
                     data-testid="pluginButton"
+                    disabled={HeaderPluginsEnabled != 'true'}
                     style={{ color: 'white' }}
                     appearance="transparent"
                     icon={<AppsAddIn24 color="white" />}

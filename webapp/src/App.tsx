@@ -197,26 +197,27 @@ const Chat = ({
                 style={{
                     color: HeaderTitleColor,
                     background: HeaderBackgroundColor,
-                    fontSize: 24,
+                    fontSize: 18,
+                    paddingLeft: 5,
                     paddingBottom: 5,
                     display: 'table',
                 }}
             >
-                <img width="400" height="80" aria-label="Header Logo" src={logo}></img>
-                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '57%' }}>{HeaderTitle}</div>
-            </h1>
-            {appState > AppState.SettingUserInfo && (
-                <div className={classes.cornerItems}>
+                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '85%' }}>{HeaderTitle}</div>
+
+                {appState > AppState.SettingUserInfo && (
                     <div className={classes.cornerItems}>
-                        <PluginGallery />
-                        <UserSettingsMenu
-                            setLoadingState={() => {
-                                setAppState(AppState.SigningOut);
-                            }}
-                        />
+                        <div className={classes.cornerItems}>
+                            <PluginGallery />
+                            <UserSettingsMenu
+                                setLoadingState={() => {
+                                    setAppState(AppState.SigningOut);
+                                }}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </h1>
             {appState === AppState.ProbeForBackend && <BackendProbe onBackendFound={onBackendFound} />}
             {appState === AppState.SettingUserInfo && (
                 <Loading text={'Hang tight while we fetch your information...'} />

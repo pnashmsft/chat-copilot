@@ -32,7 +32,10 @@ export const HeaderBackgroundColor =
     process.env.REACT_APP_HEADER_BACKGROUND_COLOR == null || process.env.REACT_APP_HEADER_BACKGROUND_COLOR.trim() === ''
         ? 'darkblue'
         : process.env.REACT_APP_HEADER_BACKGROUND_COLOR;
-export const DocumentUploadEnabled = process.env.REACT_APP_DOC_UPLOAD_ENABLED ?? false;
+export const HeaderSettingsEnabled = process.env.REACT_APP_HEADER_SETTINGS_ENABLED ?? 'false';
+export const HeaderPluginsEnabled = process.env.REACT_APP_HEADER_PLUGINS_ENABLED ?? 'false';
+export const DocumentUploadEnabled = process.env.REACT_APP_DOC_UPLOAD_ENABLED ?? 'false';
+export const CreateNewChat = process.env.REACT_APP_CREATE_NEW_CHAT ?? 'false';
 export const NetworkErrorMessage = '\n\nPlease check that your backend is running and that it is accessible by the app';
 
 export class BaseService {

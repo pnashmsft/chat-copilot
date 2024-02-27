@@ -13,6 +13,7 @@ import { useFile } from '../../libs/hooks';
 import { GetResponseOptions } from '../../libs/hooks/useChat';
 import { AlertType } from '../../libs/models/AlertType';
 import { ChatMessageType } from '../../libs/models/ChatMessage';
+import { DocumentUploadEnabled } from '../../libs/services/BaseService';
 import { useAppDispatch, useAppSelector } from '../../redux/app/hooks';
 import { RootState } from '../../redux/app/store';
 import { addAlert } from '../../redux/features/app/appSlice';
@@ -157,8 +158,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
     };
 
     const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
-        onDragLeave(e);
-        void fileHandler.handleImport(selectedId, documentFileRef, false, undefined, e.dataTransfer.files);
+        if (DocumentUploadEnabled != 'true') {
+            return;
+        } else {
+            onDragLeave(e);
+            void fileHandler.handleImport(selectedId, documentFileRef, false, undefined, e.dataTransfer.files);
+        }
     };
 
     return (
@@ -176,12 +181,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                     resize="vertical"
                     disabled={conversations[selectedId].disabled}
                     textarea={{
-                        className: isDraggingOver
-                            ? mergeClasses(classes.dragAndDrop, classes.textarea)
-                            : classes.textarea,
+                        className:
+                            isDraggingOver && DocumentUploadEnabled == 'true'
+                                ? mergeClasses(classes.dragAndDrop, classes.textarea)
+                                : classes.textarea,
                     }}
                     className={classes.input}
-                    value={isDraggingOver ? 'Drop your files here' : value}
+                    value={isDraggingOver && DocumentUploadEnabled == 'true' ? 'Drop your files here' : value}
                     onDrop={handleDrop}
                     onFocus={() => {
                         // update the locally stored value to the current value
@@ -197,7 +203,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                         }
                     }}
                     onChange={(_event, data) => {
-                        if (isDraggingOver) {
+                        if (isDraggingOver && DocumentUploadEnabled == 'true') {
                             return;
                         }
 
@@ -235,7 +241,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                     />
                     <Button
                         disabled={
-                            conversations[selectedId].disabled || (importingDocuments && importingDocuments.length > 0)
+                            DocumentUploadEnabled != 'true' ||
+                            conversations[selectedId].disabled ||
+                            (importingDocuments && importingDocuments.length > 0)
                         }
                         appearance="transparent"
                         icon={<AttachRegular />}

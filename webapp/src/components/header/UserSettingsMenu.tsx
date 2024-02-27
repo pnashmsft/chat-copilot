@@ -19,6 +19,7 @@ import {
 } from '@fluentui/react-components';
 import { Settings24Regular } from '@fluentui/react-icons';
 import { AuthHelper } from '../../libs/auth/AuthHelper';
+import { HeaderSettingsEnabled } from '../../libs/services/BaseService';
 import { useAppSelector } from '../../redux/app/hooks';
 import { RootState, resetState } from '../../redux/app/store';
 import { FeatureKeys } from '../../redux/features/app/AppState';
@@ -103,6 +104,7 @@ export const UserSettingsMenu: FC<IUserSettingsProps> = ({ setLoadingState }) =>
             ) : (
                 <Button
                     data-testid="settingsButtonWithoutAuth"
+                    disabled={HeaderSettingsEnabled != 'true'}
                     style={{ color: 'white' }}
                     appearance="transparent"
                     icon={<Settings24Regular color="white" />}
