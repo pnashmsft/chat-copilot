@@ -52,13 +52,16 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
             >
                 {setting.features.map((key) => {
                     const feature = features[key];
+                    const disableControl = !!feature.inactive;
+                    console.debug('Disable Settings Controls? ' + disableControl);
+
                     return (
                         <div key={key} className={classes.feature}>
                             <Switch
                                 label={feature.label}
                                 checked={feature.enabled}
                                 disabled={
-                                    !!feature.inactive || (key === FeatureKeys.MultiUserChat && !AuthHelper.isAuthAAD())
+                                    disableControl || (key === FeatureKeys.MultiUserChat && !AuthHelper.isAuthAAD())
                                 }
                                 onChange={() => {
                                     onFeatureChange(key);
@@ -68,7 +71,7 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
                             <Text
                                 className={classes.featureDescription}
                                 style={{
-                                    color: feature.inactive
+                                    color: disableControl
                                         ? tokens.colorNeutralForegroundDisabled
                                         : tokens.colorNeutralForeground2,
                                 }}

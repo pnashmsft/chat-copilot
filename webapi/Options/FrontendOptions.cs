@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
+
 namespace CopilotChat.WebApi.Options;
 
 /// <summary>
@@ -13,4 +15,13 @@ public sealed class FrontendOptions
     /// Client ID for the frontend
     /// </summary>
     public string AadClientId { get; set; } = string.Empty;
+
+    public string HeaderTitle { get; set; } = string.Empty;
+    public string HeaderTitleColor { get; set; } = string.Empty;
+    public string HeaderBackgroundColor { get; set; } = string.Empty;
+    public string HeaderIcon { get; set; } = string.Empty;
+    public Boolean HeaderSettingsEnabled { get; set; } = false;
+    public Boolean HeaderPluginsEnabled { get; set; } = false;
+    public Boolean DocumentUploadEnabled { get; set; } = false;
+    public Boolean CreateNewChat { get; set; } = false;
 }

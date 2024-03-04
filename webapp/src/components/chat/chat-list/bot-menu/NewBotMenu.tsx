@@ -5,9 +5,8 @@ import { FC, useState } from 'react';
 import { Button, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Tooltip } from '@fluentui/react-components';
 import { ArrowUploadRegular, BotAdd20Regular, PeopleTeamAddRegular } from '@fluentui/react-icons';
 import { useChat } from '../../../../libs/hooks';
-import { CreateNewChat } from '../../../../libs/services/BaseService';
 import { useAppSelector } from '../../../../redux/app/hooks';
-import { RootState } from '../../../../redux/app/store';
+import { RootState, store } from '../../../../redux/app/store';
 import { FeatureKeys } from '../../../../redux/features/app/AppState';
 import { BotAdd20 } from '../../../shared/BundledIcons';
 import { InvitationJoinDialog } from '../../invitation-dialog/InvitationJoinDialog';
@@ -42,8 +41,8 @@ export const NewBotMenu: FC<NewBotMenuProps> = ({ onFileUpload }) => {
                     <Tooltip content="Create new conversation" relationship="label">
                         <Button
                             data-testid="createNewConversationButton"
-                            hidden={CreateNewChat != 'true'}
-                            disabled={CreateNewChat != 'true'}
+                            hidden={store.getState().app.frontendSettings?.createNewChat != true}
+                            disabled={store.getState().app.frontendSettings?.createNewChat != true}
                             icon={<BotAdd20 />}
                             appearance="transparent"
                         />

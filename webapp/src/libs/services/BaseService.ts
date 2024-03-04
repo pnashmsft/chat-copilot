@@ -16,26 +16,6 @@ export const BackendServiceUrl =
     process.env.REACT_APP_BACKEND_URI == null || process.env.REACT_APP_BACKEND_URI.trim() === ''
         ? window.origin
         : process.env.REACT_APP_BACKEND_URI;
-export const HeaderTitle =
-    process.env.REACT_APP_HEADER_TITLE == null || process.env.REACT_APP_HEADER_TITLE.trim() === ''
-        ? 'Chat Copilot'
-        : process.env.REACT_APP_HEADER_TITLE;
-export const HeaderTitleColor =
-    process.env.REACT_APP_HEADER_TITLE_COLOR == null || process.env.REACT_APP_HEADER_TITLE_COLOR.trim() === ''
-        ? 'white'
-        : process.env.REACT_APP_HEADER_TITLE_COLOR;
-export const HeaderIcon =
-    process.env.REACT_APP_HEADER_ICON == null || process.env.REACT_APP_HEADER_ICON.trim() === ''
-        ? ''
-        : process.env.REACT_APP_HEADER_ICON;
-export const HeaderBackgroundColor =
-    process.env.REACT_APP_HEADER_BACKGROUND_COLOR == null || process.env.REACT_APP_HEADER_BACKGROUND_COLOR.trim() === ''
-        ? 'darkblue'
-        : process.env.REACT_APP_HEADER_BACKGROUND_COLOR;
-export const HeaderSettingsEnabled = process.env.REACT_APP_HEADER_SETTINGS_ENABLED ?? 'false';
-export const HeaderPluginsEnabled = process.env.REACT_APP_HEADER_PLUGINS_ENABLED ?? 'false';
-export const DocumentUploadEnabled = process.env.REACT_APP_DOC_UPLOAD_ENABLED ?? 'false';
-export const CreateNewChat = process.env.REACT_APP_CREATE_NEW_CHAT ?? 'false';
 export const NetworkErrorMessage = '\n\nPlease check that your backend is running and that it is accessible by the app';
 
 export class BaseService {

@@ -103,6 +103,30 @@ public class ServiceInfoController : ControllerBase
         return this.Ok(config);
     }
 
+    /// <summary>
+    /// Return the config to be used by the frontend client to access this service.
+    /// </summary>
+    [Route("frontendConfig")]
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public IActionResult GetFrontEndConfig()
+    {
+        var config = new FrontendConfig
+        {
+            HeaderTitle = this._frontendOptions.HeaderTitle,
+            HeaderTitleColor = this._frontendOptions.HeaderTitleColor,
+            HeaderBackgroundColor = this._frontendOptions.HeaderBackgroundColor,
+            HeaderIcon = this._frontendOptions.HeaderIcon,
+            HeaderSettingsEnabled = this._frontendOptions.HeaderSettingsEnabled,
+            HeaderPluginsEnabled = this._frontendOptions.HeaderPluginsEnabled,
+            DocumentUploadEnabled = this._frontendOptions.DocumentUploadEnabled,
+            CreateNewChat = this._frontendOptions.CreateNewChat
+        };
+
+        return this.Ok(config);
+    }
+
     private static string GetAssemblyFileVersion()
     {
         Assembly assembly = Assembly.GetExecutingAssembly();

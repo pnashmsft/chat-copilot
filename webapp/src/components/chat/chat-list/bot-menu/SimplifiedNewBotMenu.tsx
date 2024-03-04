@@ -13,9 +13,8 @@ import {
     Tooltip,
 } from '@fluentui/react-components';
 import { useChat } from '../../../../libs/hooks';
-import { CreateNewChat } from '../../../../libs/services/BaseService';
 import { useAppSelector } from '../../../../redux/app/hooks';
-import { RootState } from '../../../../redux/app/store';
+import { RootState, store } from '../../../../redux/app/store';
 import { FeatureKeys } from '../../../../redux/features/app/AppState';
 import { Add20 } from '../../../shared/BundledIcons';
 import { InvitationJoinDialog } from '../../invitation-dialog/InvitationJoinDialog';
@@ -50,8 +49,8 @@ export const SimplifiedNewBotMenu: FC<SimplifiedNewBotMenuProps> = () => {
                     <Tooltip content="Add a chat" relationship="label">
                         <Button
                             data-testid="createNewConversationButton"
-                            hidden={CreateNewChat != 'true'}
-                            disabled={CreateNewChat != 'true'}
+                            hidden={store.getState().app.frontendSettings?.createNewChat != true}
+                            disabled={store.getState().app.frontendSettings?.createNewChat != true}
                             icon={<Add20 />}
                             appearance="transparent"
                         />

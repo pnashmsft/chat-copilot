@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 
 import { AuthConfig } from '../../../libs/auth/AuthHelper';
+import { FrontendConfig } from '../../../libs/frontend/FrontendHelper';
 import { AlertType } from '../../../libs/models/AlertType';
 import { IChatUser } from '../../../libs/models/ChatUser';
 import { ServiceInfo } from '../../../libs/models/ServiceInfo';
@@ -54,6 +55,7 @@ export interface AppState {
     alerts: Alert[];
     activeUserInfo?: ActiveUserInfo;
     authConfig?: AuthConfig | null;
+    frontendSettings?: FrontendConfig | null;
     tokenUsage: TokenUsage;
     features: Record<FeatureKeys, Feature>;
     settings: Setting[];
@@ -76,10 +78,12 @@ export const Features = {
     [FeatureKeys.DarkMode]: {
         enabled: false,
         label: 'Dark Mode',
+        inactive: false,
     },
     [FeatureKeys.SimplifiedExperience]: {
         enabled: true,
         label: 'Simplified Chat Experience',
+        inactive: false,
     },
     [FeatureKeys.PluginsPlannersAndPersonas]: {
         enabled: false,
@@ -100,15 +104,18 @@ export const Features = {
     [FeatureKeys.BotAsDocs]: {
         enabled: false,
         label: 'Export Chat Sessions',
+        inactive: false,
     },
     [FeatureKeys.MultiUserChat]: {
         enabled: false,
         label: 'Live Chat Session Sharing',
+        inactive: false,
         description: 'Enable multi-user chat sessions. Not available when authorization is disabled.',
     },
     [FeatureKeys.RLHF]: {
         enabled: false,
         label: 'Reinforcement Learning from Human Feedback',
+        inactive: false,
         description: 'Enable users to vote on model-generated responses. For demonstration purposes only.',
         // TODO: [Issue #42] Send and store feedback in backend
     },
@@ -142,6 +149,7 @@ export const initialState: AppState = {
     alerts: [],
     activeUserInfo: DefaultActiveUserInfo,
     authConfig: {} as AuthConfig,
+    frontendSettings: {} as FrontendConfig,
     tokenUsage: {},
     features: Features,
     settings: Settings,

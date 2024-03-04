@@ -42,9 +42,8 @@ import { useRef } from 'react';
 import { Constants } from '../../../Constants';
 import { useChat, useFile } from '../../../libs/hooks';
 import { ChatMemorySource } from '../../../libs/models/ChatMemorySource';
-import { DocumentUploadEnabled } from '../../../libs/services/BaseService';
 import { useAppSelector } from '../../../redux/app/hooks';
-import { RootState } from '../../../redux/app/store';
+import { RootState, store } from '../../../redux/app/store';
 import { Add20 } from '../../shared/BundledIcons';
 import { timestampToDateString } from '../../utils/TextUtils';
 import { TabView } from './TabView';
@@ -164,7 +163,7 @@ export const DocumentsTab: React.FC = () => {
                                 className={classes.uploadButton}
                                 icon={<DocumentArrowUp20Regular />}
                                 disabled={
-                                    DocumentUploadEnabled != 'true' ||
+                                    store.getState().app.frontendSettings?.documentUploadEnabled != true ||
                                     conversations[selectedId].disabled ||
                                     (importingDocuments && importingDocuments.length > 0)
                                 }

@@ -13,9 +13,8 @@ import { BackendProbe, ChatView, Error, Loading, Login } from './components/view
 import { AuthHelper } from './libs/auth/AuthHelper';
 import { useChat, useFile } from './libs/hooks';
 import { AlertType } from './libs/models/AlertType';
-import { HeaderBackgroundColor, HeaderTitle, HeaderTitleColor } from './libs/services/BaseService';
 import { useAppDispatch, useAppSelector } from './redux/app/hooks';
-import { RootState } from './redux/app/store';
+import { RootState, store } from './redux/app/store';
 import { FeatureKeys } from './redux/features/app/AppState';
 import { addAlert, setActiveUserInfo, setServiceInfo } from './redux/features/app/appSlice';
 import { semanticKernelDarkTheme, semanticKernelLightTheme } from './styles';
@@ -65,6 +64,7 @@ const App = () => {
 
     const [appState, setAppState] = React.useState(AppState.ProbeForBackend);
     const dispatch = useAppDispatch();
+    const pageTitle = store.getState().app.frontendSettings?.headerTitle;
 
     const { instance, inProgress } = useMsal();
     const { features, isMaintenance } = useAppSelector((state: RootState) => state.app);
@@ -136,6 +136,12 @@ const App = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [instance, inProgress, isAuthenticated, appState, isMaintenance]);
 
+    useEffect(() => {
+        const title = pageTitle ?? 'VA Chat Copilot';
+
+        document.title = title;
+    }, [pageTitle]);
+
     const content = <Chat classes={classes} appState={appState} setAppState={setAppState} />;
     return (
         <FluentProvider
@@ -146,10 +152,10 @@ const App = () => {
                 <>
                     <UnauthenticatedTemplate>
                         <div className={classes.container}>
-                            <h1
+                            <div
                                 style={{
-                                    color: HeaderTitleColor,
-                                    background: HeaderBackgroundColor,
+                                    color: store.getState().app.frontendSettings?.headerTitleColor,
+                                    background: store.getState().app.frontendSettings?.headerBackgroundColor,
                                     fontSize: 24,
                                     paddingBottom: 5,
                                     display: 'table',
@@ -157,9 +163,9 @@ const App = () => {
                             >
                                 <img width="400" height="80" aria-label="Header Logo" src={logo}></img>
                                 <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '57%' }}>
-                                    {HeaderTitle}
+                                    {store.getState().app.frontendSettings?.headerTitle}
                                 </div>
-                            </h1>
+                            </div>
                             {appState === AppState.SigningOut && <Loading text="Signing you out..." />}
                             {appState !== AppState.SigningOut && <Login />}
                         </div>
@@ -193,17 +199,19 @@ const Chat = ({
     }, [setAppState]);
     return (
         <div className={classes.container}>
-            <h1
+            <div
                 style={{
-                    color: HeaderTitleColor,
-                    background: HeaderBackgroundColor,
+                    color: store.getState().app.frontendSettings?.headerTitleColor,
+                    background: store.getState().app.frontendSettings?.headerBackgroundColor,
                     fontSize: 18,
                     paddingLeft: 5,
                     paddingBottom: 5,
                     display: 'table',
                 }}
             >
-                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '85%' }}>{HeaderTitle}</div>
+                <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '85%' }}>
+                    {store.getState().app.frontendSettings?.headerTitle}
+                </div>
 
                 {appState > AppState.SettingUserInfo && (
                     <div className={classes.cornerItems}>
@@ -217,7 +225,7 @@ const Chat = ({
                         </div>
                     </div>
                 )}
-            </h1>
+            </div>
             {appState === AppState.ProbeForBackend && <BackendProbe onBackendFound={onBackendFound} />}
             {appState === AppState.SettingUserInfo && (
                 <Loading text={'Hang tight while we fetch your information...'} />
