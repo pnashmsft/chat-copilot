@@ -86,10 +86,10 @@ export const Features = {
         inactive: false,
     },
     [FeatureKeys.PluginsPlannersAndPersonas]: {
-        enabled: false,
+        enabled: true,
         label: 'Planners & Personas',
         description: 'The Plans and Persona tabs are hidden until you turn this on',
-        inactive: true,
+        inactive: false,
     },
     [FeatureKeys.AzureContentSafety]: {
         enabled: false,

@@ -24,4 +24,5 @@ public sealed class FrontendOptions
     public Boolean HeaderPluginsEnabled { get; set; } = false;
     public Boolean DocumentUploadEnabled { get; set; } = false;
     public Boolean CreateNewChat { get; set; } = false;
+    public string DisclaimerMsg { get; set; } = string.Empty;
 }

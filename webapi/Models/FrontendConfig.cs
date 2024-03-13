@@ -31,5 +31,7 @@ public class FrontendConfig
 
   [JsonPropertyName("createNewChat")]
   public Boolean CreateNewChat { get; set; } = false;
+  [JsonPropertyName("disclaimerMsg")]
+  public string DisclaimerMsg { get; set; } = string.Empty;
 
 }

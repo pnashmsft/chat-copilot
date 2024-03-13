@@ -255,6 +255,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                         aria-label="Attach file button"
                     />
                     {importingDocuments && importingDocuments.length > 0 && <Spinner size="tiny" />}
+                    <span style={{ fontStyle: 'italic', fontSize: '10px', alignContent: 'center' }}>
+                        {store.getState().app.frontendSettings?.disclaimerMsg}
+                    </span>
                 </div>
                 <div className={classes.essentials}>
                     {recognizer && (

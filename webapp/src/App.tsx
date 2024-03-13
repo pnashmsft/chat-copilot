@@ -197,6 +197,7 @@ const Chat = ({
                   AppState.LoadingChats,
         );
     }, [setAppState]);
+
     return (
         <div className={classes.container}>
             <div

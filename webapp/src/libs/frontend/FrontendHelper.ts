@@ -9,6 +9,7 @@ export interface FrontendConfig {
     headerPluginsEnabled: boolean;
     documentUploadEnabled: boolean;
     createNewChat: boolean;
+    disclaimerMsg: string;
 }
 
 const getFrontendConfig = () => store.getState().app.frontendSettings;

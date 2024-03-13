@@ -121,7 +121,8 @@ public class ServiceInfoController : ControllerBase
             HeaderSettingsEnabled = this._frontendOptions.HeaderSettingsEnabled,
             HeaderPluginsEnabled = this._frontendOptions.HeaderPluginsEnabled,
             DocumentUploadEnabled = this._frontendOptions.DocumentUploadEnabled,
-            CreateNewChat = this._frontendOptions.CreateNewChat
+            CreateNewChat = this._frontendOptions.CreateNewChat,
+            DisclaimerMsg = this._frontendOptions.DisclaimerMsg
         };
 
         return this.Ok(config);
