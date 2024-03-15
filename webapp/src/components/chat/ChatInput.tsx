@@ -93,6 +93,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
 
     const documentFileRef = useRef<HTMLInputElement | null>(null);
     const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+
     React.useEffect(() => {
         // Focus on the text area when the selected conversation changes
         textAreaRef.current?.focus();
@@ -164,6 +165,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
             void fileHandler.handleImport(selectedId, documentFileRef, false, undefined, e.dataTransfer.files);
         }
     };
+
+    React.useEffect(() => {
+        const msg = store.getState().app.frontendSettings?.disclaimerMsg;
+        if (msg != undefined && msg != '') {
+            dispatch(
+                addAlert({
+                    message: msg,
+                    type: AlertType.Info,
+                }),
+            );
+        }
+    }, [dispatch]);
 
     return (
         <div className={classes.root}>
@@ -255,9 +268,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                         aria-label="Attach file button"
                     />
                     {importingDocuments && importingDocuments.length > 0 && <Spinner size="tiny" />}
-                    <span style={{ fontStyle: 'italic', fontSize: '10px', alignContent: 'center' }}>
-                        {store.getState().app.frontendSettings?.disclaimerMsg}
-                    </span>
                 </div>
                 <div className={classes.essentials}>
                     {recognizer && (

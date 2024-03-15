@@ -119,7 +119,18 @@ const addNewAlert = (alerts: Alert[], newAlert: Alert) => {
         alerts.shift();
     }
 
-    alerts.push(newAlert);
+    const newMsg = newAlert.message;
+    let found = false;
+    for (const alert of alerts) {
+        if (newMsg == alert.message) {
+            found = true;
+        }
+    }
+
+    // Make sure alert isn't displayed more than once
+    if (!found) {
+        alerts.push(newAlert);
+    }
 };
 
 const updateConnectionStatus = (state: AppState, statusUpdate: Alert) => {
