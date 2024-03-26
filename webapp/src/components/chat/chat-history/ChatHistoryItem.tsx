@@ -156,9 +156,8 @@ export const ChatHistoryItem: React.FC<ChatHistoryItemProps> = ({ message, messa
     // Currently for demonstration purposes only, no feedback is actually sent to kernel / model
     const showShowRLHFMessage =
         features[FeatureKeys.RLHF].enabled &&
-        message.userFeedback === UserFeedback.Requested &&
         messageIndex === conversations[selectedId].messages.length - 1 &&
-        message.userId === 'Bot';
+        message.userId.toLowerCase() === 'bot';
 
     const messageCitations = message.citations ?? [];
     const showMessageCitation = messageCitations.length > 0;
@@ -220,9 +219,7 @@ export const ChatHistoryItem: React.FC<ChatHistoryItemProps> = ({ message, messa
                                 }`}
                             </ToggleButton>
                         )}
-                        {showShowRLHFMessage && (
-                            <div className={classes.rlhf}>{<UserFeedbackActions messageIndex={messageIndex} />}</div>
-                        )}
+                        {<div className={classes.rlhf}>{<UserFeedbackActions messageIndex={messageIndex} />}</div>}
                         {showCitationCards && <CitationCards message={message} />}
                     </div>
                 )}

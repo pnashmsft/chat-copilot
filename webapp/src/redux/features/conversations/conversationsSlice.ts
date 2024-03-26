@@ -212,10 +212,10 @@ const frontLoadChat = (state: ConversationsState, id: string) => {
 };
 
 const updateConversation = (state: ConversationsState, chatId: string, message: IChatMessage) => {
-    const requestUserFeedback = message.userId === 'bot' && message.type === ChatMessageType.Message;
+    const requestUserFeedback = message.userId.toLowerCase() === 'bot' && message.type === ChatMessageType.Message;
     state.conversations[chatId].messages.push({
         ...message,
-        userFeedback: requestUserFeedback ? UserFeedback.Requested : undefined,
+        userFeedback: requestUserFeedback ? UserFeedback.Requested : UserFeedback.Unknown,
     });
     frontLoadChat(state, chatId);
 };
