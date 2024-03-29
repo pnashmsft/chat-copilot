@@ -9,7 +9,7 @@ Bicep template for deploying CopilotChat Azure resources.
 param name string = 'copichat'
 
 @description('SKU for the Azure App Service plan')
-@allowed([ 'B1', 'S1', 'S2', 'S3', 'P1V3', 'P2V3', 'I1V2', 'I2V2' ])
+@allowed(['B1', 'S1', 'S2', 'S3', 'P1V3', 'P2V3', 'I1V2', 'I2V2'])
 param webAppServiceSku string = 'B1'
 
 @description('Location of package to deploy as the web service')
@@ -90,50 +90,54 @@ var uniqueName = '${name}-${rgIdHash}'
 @description('Name of the Azure Storage file share to create')
 var storageFileShareName = 'aciqdrantshare'
 
-resource openAI 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (deployNewAzureOpenAI) {
-  name: 'ai-${uniqueName}'
-  location: location
-  kind: 'OpenAI'
-  sku: {
-    name: 'S0'
-  }
-  properties: {
-    customSubDomainName: toLower(uniqueName)
-  }
-}
-
-resource openAI_completionModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = if (deployNewAzureOpenAI) {
-  parent: openAI
-  name: completionModel
-  sku: {
-    name: 'Standard'
-    capacity: 30
-  }
-  properties: {
-    model: {
-      format: 'OpenAI'
-      name: completionModel
+resource openAI 'Microsoft.CognitiveServices/accounts@2023-05-01' =
+  if (deployNewAzureOpenAI) {
+    name: 'ai-${uniqueName}'
+    location: location
+    kind: 'OpenAI'
+    sku: {
+      name: 'S0'
+    }
+    properties: {
+      customSubDomainName: toLower(uniqueName)
     }
   }
-}
 
-resource openAI_embeddingModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = if (deployNewAzureOpenAI) {
-  parent: openAI
-  name: embeddingModel
-  sku: {
-    name: 'Standard'
-    capacity: 30
-  }
-  properties: {
-    model: {
-      format: 'OpenAI'
-      name: embeddingModel
+resource openAI_completionModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
+  if (deployNewAzureOpenAI) {
+    parent: openAI
+    name: completionModel
+    sku: {
+      name: 'Standard'
+      capacity: 30
+    }
+    properties: {
+      model: {
+        format: 'OpenAI'
+        name: completionModel
+      }
     }
   }
-  dependsOn: [// This "dependency" is to create models sequentially because the resource
-    openAI_completionModel // provider does not support parallel creation of models properly.
-  ]
-}
+
+resource openAI_embeddingModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
+  if (deployNewAzureOpenAI) {
+    parent: openAI
+    name: embeddingModel
+    sku: {
+      name: 'Standard'
+      capacity: 30
+    }
+    properties: {
+      model: {
+        format: 'OpenAI'
+        name: embeddingModel
+      }
+    }
+    dependsOn: [
+      // This "dependency" is to create models sequentially because the resource
+      openAI_completionModel // provider does not support parallel creation of models properly.
+    ]
+  }
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: 'asp-${uniqueName}-webapi'
@@ -182,7 +186,8 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     use32BitWorkerProcess: false
     vnetRouteAllEnabled: true
     webSocketsEnabled: true
-    appSettings: concat([
+    appSettings: concat(
+      [
         {
           name: 'Authentication:Type'
           value: 'AzureAd'
@@ -226,6 +231,10 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         {
           name: 'ChatStore:Cosmos:ChatParticipantsContainer'
           value: 'chatparticipants'
+        }
+        {
+          name: 'ChatStore:Cosmos:UserSettingsContainer'
+          value: 'usersettings'
         }
         {
           name: 'ChatStore:Cosmos:ConnectionString'
@@ -404,35 +413,38 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
           value: 'https://www.klarna.com'
         }
       ],
-      (deployWebSearcherPlugin) ? [
-        {
-          name: 'Plugins:1:Name'
-          value: 'WebSearcher'
-        }
-        {
-          name: 'Plugins:1:ManifestDomain'
-          value: 'https://${functionAppWebSearcherPlugin.properties.defaultHostName}'
-        }
-        {
-          name: 'Plugins:1:Key'
-          value: listkeys('${functionAppWebSearcherPlugin.id}/host/default/', '2022-09-01').functionKeys.default
-        }
-      ] : []
+      (deployWebSearcherPlugin)
+        ? [
+            {
+              name: 'Plugins:1:Name'
+              value: 'WebSearcher'
+            }
+            {
+              name: 'Plugins:1:ManifestDomain'
+              value: 'https://${functionAppWebSearcherPlugin.properties.defaultHostName}'
+            }
+            {
+              name: 'Plugins:1:Key'
+              value: listkeys('${functionAppWebSearcherPlugin.id}/host/default/', '2022-09-01').functionKeys.default
+            }
+          ]
+        : []
     )
   }
 }
 
-resource appServiceWebDeploy 'Microsoft.Web/sites/extensions@2022-09-01' = if (deployPackages) {
-  name: 'MSDeploy'
-  kind: 'string'
-  parent: appServiceWeb
-  properties: {
-    packageUri: webApiPackageUri
+resource appServiceWebDeploy 'Microsoft.Web/sites/extensions@2022-09-01' =
+  if (deployPackages) {
+    name: 'MSDeploy'
+    kind: 'string'
+    parent: appServiceWeb
+    properties: {
+      packageUri: webApiPackageUri
+    }
+    dependsOn: [
+      appServiceWebConfig
+    ]
   }
-  dependsOn: [
-    appServiceWebConfig
-  ]
-}
 
 resource appServiceMemoryPipeline 'Microsoft.Web/sites@2022-09-01' = {
   name: 'app-${uniqueName}-memorypipeline'
@@ -612,75 +624,79 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
   }
 }
 
-resource appServiceMemoryPipelineDeploy 'Microsoft.Web/sites/extensions@2022-09-01' = if (deployPackages) {
-  name: 'MSDeploy'
-  kind: 'string'
-  parent: appServiceMemoryPipeline
-  properties: {
-    packageUri: memoryPipelinePackageUri
-  }
-  dependsOn: [
-    appServiceMemoryPipelineConfig
-  ]
-}
-
-resource functionAppWebSearcherPlugin 'Microsoft.Web/sites@2022-09-01' = if (deployWebSearcherPlugin) {
-  name: 'function-${uniqueName}-websearcher-plugin'
-  location: location
-  kind: 'functionapp'
-  tags: {
-    skweb: '1'
-  }
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    siteConfig: {
-      alwaysOn: true
+resource appServiceMemoryPipelineDeploy 'Microsoft.Web/sites/extensions@2022-09-01' =
+  if (deployPackages) {
+    name: 'MSDeploy'
+    kind: 'string'
+    parent: appServiceMemoryPipeline
+    properties: {
+      packageUri: memoryPipelinePackageUri
     }
-  }
-}
-
-resource functionAppWebSearcherPluginConfig 'Microsoft.Web/sites/config@2022-09-01' = if (deployWebSearcherPlugin) {
-  parent: functionAppWebSearcherPlugin
-  name: 'web'
-  properties: {
-    minTlsVersion: '1.2'
-    appSettings: [
-      {
-        name: 'FUNCTIONS_EXTENSION_VERSION'
-        value: '~4'
-      }
-      {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-        value: 'dotnet-isolated'
-      }
-      {
-        name: 'AzureWebJobsStorage'
-        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
-      }
-      {
-        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        value: appInsights.properties.InstrumentationKey
-      }
-      {
-        name: 'PluginConfig:BingApiKey'
-        value: (deployWebSearcherPlugin) ? bingSearchService.listKeys().key1 : ''
-      }
+    dependsOn: [
+      appServiceMemoryPipelineConfig
     ]
   }
-}
 
-resource functionAppWebSearcherDeploy 'Microsoft.Web/sites/extensions@2022-09-01' = if (deployPackages && deployWebSearcherPlugin) {
-  name: 'MSDeploy'
-  kind: 'string'
-  parent: functionAppWebSearcherPlugin
-  properties: {
-    packageUri: webSearcherPackageUri
+resource functionAppWebSearcherPlugin 'Microsoft.Web/sites@2022-09-01' =
+  if (deployWebSearcherPlugin) {
+    name: 'function-${uniqueName}-websearcher-plugin'
+    location: location
+    kind: 'functionapp'
+    tags: {
+      skweb: '1'
+    }
+    properties: {
+      serverFarmId: appServicePlan.id
+      httpsOnly: true
+      siteConfig: {
+        alwaysOn: true
+      }
+    }
   }
-  dependsOn: [
-    functionAppWebSearcherPluginConfig
-  ]
-}
+
+resource functionAppWebSearcherPluginConfig 'Microsoft.Web/sites/config@2022-09-01' =
+  if (deployWebSearcherPlugin) {
+    parent: functionAppWebSearcherPlugin
+    name: 'web'
+    properties: {
+      minTlsVersion: '1.2'
+      appSettings: [
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'dotnet-isolated'
+        }
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+        }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: appInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'PluginConfig:BingApiKey'
+          value: (deployWebSearcherPlugin) ? bingSearchService.listKeys().key1 : ''
+        }
+      ]
+    }
+  }
+
+resource functionAppWebSearcherDeploy 'Microsoft.Web/sites/extensions@2022-09-01' =
+  if (deployPackages && deployWebSearcherPlugin) {
+    name: 'MSDeploy'
+    kind: 'string'
+    parent: functionAppWebSearcherPlugin
+    properties: {
+      packageUri: webSearcherPackageUri
+    }
+    dependsOn: [
+      functionAppWebSearcherPluginConfig
+    ]
+  }
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: 'appins-${uniqueName}'
@@ -698,20 +714,21 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 resource appInsightExtensionWeb 'Microsoft.Web/sites/siteextensions@2022-09-01' = {
   parent: appServiceWeb
   name: 'Microsoft.ApplicationInsights.AzureWebSites'
-  dependsOn: [ appServiceWebDeploy ]
+  dependsOn: [appServiceWebDeploy]
 }
 
 resource appInsightExtensionMemory 'Microsoft.Web/sites/siteextensions@2022-09-01' = {
   parent: appServiceMemoryPipeline
   name: 'Microsoft.ApplicationInsights.AzureWebSites'
-  dependsOn: [ appServiceMemoryPipelineDeploy ]
+  dependsOn: [appServiceMemoryPipelineDeploy]
 }
 
-resource appInsightExtensionWebSearchPlugin 'Microsoft.Web/sites/siteextensions@2022-09-01' = if (deployWebSearcherPlugin) {
-  parent: functionAppWebSearcherPlugin
-  name: 'Microsoft.ApplicationInsights.AzureWebSites'
-  dependsOn: [ functionAppWebSearcherDeploy ]
-}
+resource appInsightExtensionWebSearchPlugin 'Microsoft.Web/sites/siteextensions@2022-09-01' =
+  if (deployWebSearcherPlugin) {
+    parent: functionAppWebSearcherPlugin
+    name: 'Microsoft.ApplicationInsights.AzureWebSites'
+    dependsOn: [functionAppWebSearcherDeploy]
+  }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: 'la-${uniqueName}'
@@ -743,373 +760,391 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
     supportsHttpsTrafficOnly: true
     allowBlobPublicAccess: false
   }
-  resource fileservices 'fileServices' = if (memoryStore == 'Qdrant') {
-    name: 'default'
-    resource share 'shares' = {
-      name: storageFileShareName
+  resource fileservices 'fileServices' =
+    if (memoryStore == 'Qdrant') {
+      name: 'default'
+      resource share 'shares' = {
+        name: storageFileShareName
+      }
+    }
+}
+
+resource appServicePlanQdrant 'Microsoft.Web/serverfarms@2022-03-01' =
+  if (memoryStore == 'Qdrant') {
+    name: 'asp-${uniqueName}-qdrant'
+    location: location
+    kind: 'linux'
+    sku: {
+      name: 'P1v3'
+    }
+    properties: {
+      reserved: true
     }
   }
-}
 
-resource appServicePlanQdrant 'Microsoft.Web/serverfarms@2022-03-01' = if (memoryStore == 'Qdrant') {
-  name: 'asp-${uniqueName}-qdrant'
-  location: location
-  kind: 'linux'
-  sku: {
-    name: 'P1v3'
+resource appServiceQdrant 'Microsoft.Web/sites@2022-09-01' =
+  if (memoryStore == 'Qdrant') {
+    name: 'app-${uniqueName}-qdrant'
+    location: location
+    kind: 'app,linux,container'
+    properties: {
+      serverFarmId: appServicePlanQdrant.id
+      httpsOnly: true
+      reserved: true
+      clientCertMode: 'Required'
+      virtualNetworkSubnetId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[1].id : null
+      siteConfig: {
+        numberOfWorkers: 1
+        linuxFxVersion: 'DOCKER|qdrant/qdrant:latest'
+        alwaysOn: true
+        vnetRouteAllEnabled: true
+        ipSecurityRestrictions: [
+          {
+            vnetSubnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
+            action: 'Allow'
+            priority: 300
+            name: 'Allow front vnet'
+          }
+          {
+            ipAddress: 'Any'
+            action: 'Deny'
+            priority: 2147483647
+            name: 'Deny all'
+          }
+        ]
+        azureStorageAccounts: {
+          aciqdrantshare: {
+            type: 'AzureFiles'
+            accountName: memoryStore == 'Qdrant' ? storage.name : 'notdeployed'
+            shareName: storageFileShareName
+            mountPath: '/qdrant/storage'
+            accessKey: memoryStore == 'Qdrant' ? storage.listKeys().keys[0].value : ''
+          }
+        }
+      }
+    }
   }
-  properties: {
-    reserved: true
-  }
-}
 
-resource appServiceQdrant 'Microsoft.Web/sites@2022-09-01' = if (memoryStore == 'Qdrant') {
-  name: 'app-${uniqueName}-qdrant'
-  location: location
-  kind: 'app,linux,container'
-  properties: {
-    serverFarmId: appServicePlanQdrant.id
-    httpsOnly: true
-    reserved: true
-    clientCertMode: 'Required'
-    virtualNetworkSubnetId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[1].id : null
-    siteConfig: {
-      numberOfWorkers: 1
-      linuxFxVersion: 'DOCKER|qdrant/qdrant:latest'
-      alwaysOn: true
-      vnetRouteAllEnabled: true
-      ipSecurityRestrictions: [
+resource azureAISearch 'Microsoft.Search/searchServices@2022-09-01' =
+  if (memoryStore == 'AzureAISearch') {
+    name: 'acs-${uniqueName}'
+    location: location
+    sku: {
+      name: 'basic'
+    }
+    properties: {
+      replicaCount: 1
+      partitionCount: 1
+    }
+  }
+
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' =
+  if (memoryStore == 'Qdrant') {
+    name: 'vnet-${uniqueName}'
+    location: location
+    properties: {
+      addressSpace: {
+        addressPrefixes: [
+          '10.0.0.0/16'
+        ]
+      }
+      subnets: [
         {
-          vnetSubnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
-          action: 'Allow'
-          priority: 300
-          name: 'Allow front vnet'
+          name: 'webSubnet'
+          properties: {
+            addressPrefix: '10.0.1.0/24'
+            networkSecurityGroup: {
+              id: webNsg.id
+            }
+            serviceEndpoints: [
+              {
+                service: 'Microsoft.Web'
+                locations: [
+                  '*'
+                ]
+              }
+            ]
+            delegations: [
+              {
+                name: 'delegation'
+                properties: {
+                  serviceName: 'Microsoft.Web/serverfarms'
+                }
+              }
+            ]
+            privateEndpointNetworkPolicies: 'Disabled'
+            privateLinkServiceNetworkPolicies: 'Enabled'
+          }
         }
         {
-          ipAddress: 'Any'
-          action: 'Deny'
-          priority: 2147483647
-          name: 'Deny all'
+          name: 'qdrantSubnet'
+          properties: {
+            addressPrefix: '10.0.2.0/24'
+            networkSecurityGroup: {
+              id: qdrantNsg.id
+            }
+            serviceEndpoints: [
+              {
+                service: 'Microsoft.Web'
+                locations: [
+                  '*'
+                ]
+              }
+            ]
+            delegations: [
+              {
+                name: 'delegation'
+                properties: {
+                  serviceName: 'Microsoft.Web/serverfarms'
+                }
+              }
+            ]
+            privateEndpointNetworkPolicies: 'Disabled'
+            privateLinkServiceNetworkPolicies: 'Enabled'
+          }
         }
       ]
-      azureStorageAccounts: {
-        aciqdrantshare: {
-          type: 'AzureFiles'
-          accountName: memoryStore == 'Qdrant' ? storage.name : 'notdeployed'
-          shareName: storageFileShareName
-          mountPath: '/qdrant/storage'
-          accessKey: memoryStore == 'Qdrant' ? storage.listKeys().keys[0].value : ''
-        }
-      }
     }
   }
-}
 
-resource azureAISearch 'Microsoft.Search/searchServices@2022-09-01' = if (memoryStore == 'AzureAISearch') {
-  name: 'acs-${uniqueName}'
-  location: location
-  sku: {
-    name: 'basic'
-  }
-  properties: {
-    replicaCount: 1
-    partitionCount: 1
-  }
-}
-
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = if (memoryStore == 'Qdrant') {
-  name: 'vnet-${uniqueName}'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.0.0.0/16'
+resource webNsg 'Microsoft.Network/networkSecurityGroups@2022-11-01' =
+  if (memoryStore == 'Qdrant') {
+    name: 'nsg-${uniqueName}-webapi'
+    location: location
+    properties: {
+      securityRules: [
+        {
+          name: 'AllowAnyHTTPSInbound'
+          properties: {
+            protocol: 'TCP'
+            sourcePortRange: '*'
+            destinationPortRange: '443'
+            sourceAddressPrefix: '*'
+            destinationAddressPrefix: '*'
+            access: 'Allow'
+            priority: 100
+            direction: 'Inbound'
+          }
+        }
       ]
     }
-    subnets: [
-      {
-        name: 'webSubnet'
-        properties: {
-          addressPrefix: '10.0.1.0/24'
-          networkSecurityGroup: {
-            id: webNsg.id
-          }
-          serviceEndpoints: [
+  }
+
+resource qdrantNsg 'Microsoft.Network/networkSecurityGroups@2022-11-01' =
+  if (memoryStore == 'Qdrant') {
+    name: 'nsg-${uniqueName}-qdrant'
+    location: location
+    properties: {
+      securityRules: []
+    }
+  }
+
+resource webSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' =
+  if (memoryStore == 'Qdrant') {
+    parent: appServiceWeb
+    name: 'webSubnetConnection'
+    properties: {
+      vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
+      isSwift: true
+    }
+  }
+
+resource memSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' =
+  if (memoryStore == 'Qdrant') {
+    parent: appServiceMemoryPipeline
+    name: 'memSubnetConnection'
+    properties: {
+      vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
+      isSwift: true
+    }
+  }
+
+resource qdrantSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' =
+  if (memoryStore == 'Qdrant') {
+    parent: appServiceQdrant
+    name: 'qdrantSubnetConnection'
+    properties: {
+      vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[1].id : null
+      isSwift: true
+    }
+  }
+
+resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' =
+  if (deployCosmosDB) {
+    name: toLower('cosmos-${uniqueName}')
+    location: location
+    kind: 'GlobalDocumentDB'
+    properties: {
+      consistencyPolicy: { defaultConsistencyLevel: 'Session' }
+      locations: [
+        {
+          locationName: location
+          failoverPriority: 0
+          isZoneRedundant: false
+        }
+      ]
+      databaseAccountOfferType: 'Standard'
+    }
+  }
+
+resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' =
+  if (deployCosmosDB) {
+    parent: cosmosAccount
+    name: 'CopilotChat'
+    properties: {
+      resource: {
+        id: 'CopilotChat'
+      }
+    }
+  }
+
+resource messageContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' =
+  if (deployCosmosDB) {
+    parent: cosmosDatabase
+    name: 'chatmessages'
+    properties: {
+      resource: {
+        id: 'chatmessages'
+        indexingPolicy: {
+          indexingMode: 'consistent'
+          automatic: true
+          includedPaths: [
             {
-              service: 'Microsoft.Web'
-              locations: [
-                '*'
-              ]
+              path: '/*'
             }
           ]
-          delegations: [
+          excludedPaths: [
             {
-              name: 'delegation'
-              properties: {
-                serviceName: 'Microsoft.Web/serverfarms'
-              }
+              path: '/"_etag"/?'
             }
           ]
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+        partitionKey: {
+          paths: [
+            '/chatId'
+          ]
+          kind: 'Hash'
+          version: 2
         }
       }
-      {
-        name: 'qdrantSubnet'
-        properties: {
-          addressPrefix: '10.0.2.0/24'
-          networkSecurityGroup: {
-            id: qdrantNsg.id
-          }
-          serviceEndpoints: [
+    }
+  }
+
+resource sessionContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' =
+  if (deployCosmosDB) {
+    parent: cosmosDatabase
+    name: 'chatsessions'
+    properties: {
+      resource: {
+        id: 'chatsessions'
+        indexingPolicy: {
+          indexingMode: 'consistent'
+          automatic: true
+          includedPaths: [
             {
-              service: 'Microsoft.Web'
-              locations: [
-                '*'
-              ]
+              path: '/*'
             }
           ]
-          delegations: [
+          excludedPaths: [
             {
-              name: 'delegation'
-              properties: {
-                serviceName: 'Microsoft.Web/serverfarms'
-              }
+              path: '/"_etag"/?'
             }
           ]
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+        partitionKey: {
+          paths: [
+            '/id'
+          ]
+          kind: 'Hash'
+          version: 2
         }
       }
-    ]
+    }
   }
-}
 
-resource webNsg 'Microsoft.Network/networkSecurityGroups@2022-11-01' = if (memoryStore == 'Qdrant') {
-  name: 'nsg-${uniqueName}-webapi'
-  location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowAnyHTTPSInbound'
-        properties: {
-          protocol: 'TCP'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 100
-          direction: 'Inbound'
+resource participantContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' =
+  if (deployCosmosDB) {
+    parent: cosmosDatabase
+    name: 'chatparticipants'
+    properties: {
+      resource: {
+        id: 'chatparticipants'
+        indexingPolicy: {
+          indexingMode: 'consistent'
+          automatic: true
+          includedPaths: [
+            {
+              path: '/*'
+            }
+          ]
+          excludedPaths: [
+            {
+              path: '/"_etag"/?'
+            }
+          ]
+        }
+        partitionKey: {
+          paths: [
+            '/userId'
+          ]
+          kind: 'Hash'
+          version: 2
         }
       }
-    ]
-  }
-}
-
-resource qdrantNsg 'Microsoft.Network/networkSecurityGroups@2022-11-01' = if (memoryStore == 'Qdrant') {
-  name: 'nsg-${uniqueName}-qdrant'
-  location: location
-  properties: {
-    securityRules: []
-  }
-}
-
-resource webSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = if (memoryStore == 'Qdrant') {
-  parent: appServiceWeb
-  name: 'webSubnetConnection'
-  properties: {
-    vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
-    isSwift: true
-  }
-}
-
-resource memSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = if (memoryStore == 'Qdrant') {
-  parent: appServiceMemoryPipeline
-  name: 'memSubnetConnection'
-  properties: {
-    vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[0].id : null
-    isSwift: true
-  }
-}
-
-resource qdrantSubnetConnection 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = if (memoryStore == 'Qdrant') {
-  parent: appServiceQdrant
-  name: 'qdrantSubnetConnection'
-  properties: {
-    vnetResourceId: memoryStore == 'Qdrant' ? virtualNetwork.properties.subnets[1].id : null
-    isSwift: true
-  }
-}
-
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = if (deployCosmosDB) {
-  name: toLower('cosmos-${uniqueName}')
-  location: location
-  kind: 'GlobalDocumentDB'
-  properties: {
-    consistencyPolicy: { defaultConsistencyLevel: 'Session' }
-    locations: [ {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    databaseAccountOfferType: 'Standard'
-  }
-}
-
-resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' = if (deployCosmosDB) {
-  parent: cosmosAccount
-  name: 'CopilotChat'
-  properties: {
-    resource: {
-      id: 'CopilotChat'
     }
   }
-}
 
-resource messageContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = if (deployCosmosDB) {
-  parent: cosmosDatabase
-  name: 'chatmessages'
-  properties: {
-    resource: {
-      id: 'chatmessages'
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
-      }
-      partitionKey: {
-        paths: [
-          '/chatId'
-        ]
-        kind: 'Hash'
-        version: 2
+resource memorySourcesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' =
+  if (deployCosmosDB) {
+    parent: cosmosDatabase
+    name: 'chatmemorysources'
+    properties: {
+      resource: {
+        id: 'chatmemorysources'
+        indexingPolicy: {
+          indexingMode: 'consistent'
+          automatic: true
+          includedPaths: [
+            {
+              path: '/*'
+            }
+          ]
+          excludedPaths: [
+            {
+              path: '/"_etag"/?'
+            }
+          ]
+        }
+        partitionKey: {
+          paths: [
+            '/chatId'
+          ]
+          kind: 'Hash'
+          version: 2
+        }
       }
     }
   }
-}
 
-resource sessionContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = if (deployCosmosDB) {
-  parent: cosmosDatabase
-  name: 'chatsessions'
-  properties: {
-    resource: {
-      id: 'chatsessions'
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
+resource speechAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' =
+  if (deploySpeechServices) {
+    name: 'cog-speech-${uniqueName}'
+    location: location
+    sku: {
+      name: 'S0'
+    }
+    kind: 'SpeechServices'
+    identity: {
+      type: 'None'
+    }
+    properties: {
+      customSubDomainName: 'cog-speech-${uniqueName}'
+      networkAcls: {
+        defaultAction: 'Allow'
       }
-      partitionKey: {
-        paths: [
-          '/id'
-        ]
-        kind: 'Hash'
-        version: 2
-      }
+      publicNetworkAccess: 'Enabled'
     }
   }
-}
-
-resource participantContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = if (deployCosmosDB) {
-  parent: cosmosDatabase
-  name: 'chatparticipants'
-  properties: {
-    resource: {
-      id: 'chatparticipants'
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
-      }
-      partitionKey: {
-        paths: [
-          '/userId'
-        ]
-        kind: 'Hash'
-        version: 2
-      }
-    }
-  }
-}
-
-resource memorySourcesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = if (deployCosmosDB) {
-  parent: cosmosDatabase
-  name: 'chatmemorysources'
-  properties: {
-    resource: {
-      id: 'chatmemorysources'
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
-      }
-      partitionKey: {
-        paths: [
-          '/chatId'
-        ]
-        kind: 'Hash'
-        version: 2
-      }
-    }
-  }
-}
-
-resource speechAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' = if (deploySpeechServices) {
-  name: 'cog-speech-${uniqueName}'
-  location: location
-  sku: {
-    name: 'S0'
-  }
-  kind: 'SpeechServices'
-  identity: {
-    type: 'None'
-  }
-  properties: {
-    customSubDomainName: 'cog-speech-${uniqueName}'
-    networkAcls: {
-      defaultAction: 'Allow'
-    }
-    publicNetworkAccess: 'Enabled'
-  }
-}
 
 resource ocrAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
   name: 'cog-ocr-${uniqueName}'
@@ -1130,19 +1165,17 @@ resource ocrAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
   }
 }
 
-resource bingSearchService 'Microsoft.Bing/accounts@2020-06-10' = if (deployWebSearcherPlugin) {
-  name: 'bing-search-${uniqueName}'
-  location: 'global'
-  sku: {
-    name: 'S1'
+resource bingSearchService 'Microsoft.Bing/accounts@2020-06-10' =
+  if (deployWebSearcherPlugin) {
+    name: 'bing-search-${uniqueName}'
+    location: 'global'
+    sku: {
+      name: 'S1'
+    }
+    kind: 'Bing.Search.v7'
   }
-  kind: 'Bing.Search.v7'
-}
 
 output webapiUrl string = appServiceWeb.properties.defaultHostName
 output webapiName string = appServiceWeb.name
 output memoryPipelineName string = appServiceMemoryPipeline.name
-output pluginNames array = concat(
-  [],
-  (deployWebSearcherPlugin) ? [ functionAppWebSearcherPlugin.name ] : []
-)
+output pluginNames array = concat([], (deployWebSearcherPlugin) ? [functionAppWebSearcherPlugin.name] : [])

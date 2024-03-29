@@ -22,6 +22,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import React from 'react';
+import { useUserSettings } from '../../../../src/libs/hooks';
 import { useAppSelector } from '../../../redux/app/hooks';
 import { RootState } from '../../../redux/app/store';
 import { SharedStyles, useDialogClasses } from '../../../styles';
@@ -47,6 +48,12 @@ const useClasses = makeStyles({
         paddingTop: tokens.spacingVerticalL,
     },
 });
+
+const saveUserSettings = () => {
+    const userSettingsHandler = useUserSettings();
+
+    void userSettingsHandler.updateUserSettings();
+};
 
 interface ISettingsDialogProps {
     open: boolean;
@@ -120,7 +127,7 @@ export const SettingsDialog: React.FC<ISettingsDialogProps> = ({ open, closeDial
                         </a>
                     </Label>
                     <DialogTrigger disableButtonEnhancement>
-                        <Button appearance="secondary" data-testid="userSettingsCloseButton">
+                        <Button appearance="secondary" data-testid="userSettingsCloseButton" onClick={saveUserSettings}>
                             Close
                         </Button>
                     </DialogTrigger>
