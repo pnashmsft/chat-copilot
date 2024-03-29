@@ -120,7 +120,8 @@ public class ServiceInfoController : ControllerBase
             HeaderIcon = this._frontendOptions.HeaderIcon,
             HeaderSettingsEnabled = this._frontendOptions.HeaderSettingsEnabled,
             HeaderPluginsEnabled = this._frontendOptions.HeaderPluginsEnabled,
-            DocumentUploadEnabled = this._frontendOptions.DocumentUploadEnabled,
+            DocumentLocalUploadEnabled = this._frontendOptions.DocumentLocalUploadEnabled,
+            DocumentGlobalUploadEnabled = this._frontendOptions.DocumentGlobalUploadEnabled,
             CreateNewChat = this._frontendOptions.CreateNewChat,
             DisclaimerMsg = this._frontendOptions.DisclaimerMsg
         };

@@ -158,7 +158,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
     };
 
     const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
-        if (store.getState().app.frontendSettings?.documentUploadEnabled != true) {
+        if (store.getState().app.frontendSettings?.documentLocalUploadEnabled != true) {
             return;
         } else {
             onDragLeave(e);
@@ -194,13 +194,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                     disabled={conversations[selectedId].disabled}
                     textarea={{
                         className:
-                            isDraggingOver && store.getState().app.frontendSettings?.documentUploadEnabled == true
+                            isDraggingOver && store.getState().app.frontendSettings?.documentLocalUploadEnabled == true
                                 ? mergeClasses(classes.dragAndDrop, classes.textarea)
                                 : classes.textarea,
                     }}
                     className={classes.input}
                     value={
-                        isDraggingOver && store.getState().app.frontendSettings?.documentUploadEnabled == true
+                        isDraggingOver && store.getState().app.frontendSettings?.documentLocalUploadEnabled == true
                             ? 'Drop your files here'
                             : value
                     }
@@ -219,7 +219,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                         }
                     }}
                     onChange={(_event, data) => {
-                        if (isDraggingOver && store.getState().app.frontendSettings?.documentUploadEnabled == true) {
+                        if (
+                            isDraggingOver &&
+                            store.getState().app.frontendSettings?.documentLocalUploadEnabled == true
+                        ) {
                             return;
                         }
 
@@ -257,7 +260,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isDraggingOver, onDragLeav
                     />
                     <Button
                         disabled={
-                            store.getState().app.frontendSettings?.documentUploadEnabled != true ||
+                            store.getState().app.frontendSettings?.documentLocalUploadEnabled != true ||
                             conversations[selectedId].disabled ||
                             (importingDocuments && importingDocuments.length > 0)
                         }
