@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CopilotChat.WebApi.Models.Response;
 using CopilotChat.WebApi.Storage;
+using Microsoft.Azure.Cosmos;
 
 namespace CopilotChat.WebApi.Models.Storage;
 
@@ -16,6 +17,17 @@ namespace CopilotChat.WebApi.Models.Storage;
 public class CopilotChatMessage : IStorageEntity
 {
     private static readonly JsonSerializerOptions SerializerSettings = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+    /**
+     * States for RLHF
+     */
+    public enum UserFeedback
+    {
+        Unknown,
+        Requested,
+        Positive,
+        Negative,
+    }
 
     /// <summary>
     /// Role of the author of a chat message.
@@ -117,6 +129,11 @@ public class CopilotChatMessage : IStorageEntity
     public string Partition => this.ChatId;
 
     /// <summary>
+    /// User feedback provided on chat response.
+    /// </summary>
+    public UserFeedback userFeedback { get; set; }
+
+    /// <summary>
     /// Create a new chat message. Timestamp is automatically generated.
     /// </summary>
     /// <param name="userId">Id of the user who sent this message</param>
@@ -124,6 +141,7 @@ public class CopilotChatMessage : IStorageEntity
     /// <param name="chatId">The chat ID that this message belongs to</param>
     /// <param name="content">The message</param>
     /// <param name="prompt">The prompt used to generate the message</param>
+    /// <param name="userFeedback">User feedback - thumbs up or down
     /// <param name="authorRole">Role of the author</param>
     /// <param name="type">Type of the message</param>
     /// <param name="tokenUsage">Total token usages used to generate bot response</param>
@@ -133,6 +151,7 @@ public class CopilotChatMessage : IStorageEntity
         string chatId,
         string content,
         string? prompt = null,
+        UserFeedback? userFeedback = UserFeedback.Unknown,
         IEnumerable<CitationSource>? citations = null,
         AuthorRoles authorRole = AuthorRoles.User,
         ChatMessageType type = ChatMessageType.Message,
@@ -149,6 +168,15 @@ public class CopilotChatMessage : IStorageEntity
         this.AuthorRole = authorRole;
         this.Type = type;
         this.TokenUsage = tokenUsage;
+
+        if (userFeedback == null)
+        {
+            this.userFeedback = UserFeedback.Unknown;
+        }
+        else
+        {
+            this.userFeedback = (UserFeedback)userFeedback;
+        }
     }
 
     /// <summary>
@@ -157,10 +185,11 @@ public class CopilotChatMessage : IStorageEntity
     /// <param name="chatId">The chat ID that this message belongs to</param>
     /// <param name="content">The message</param>
     /// <param name="prompt">The prompt used to generate the message</param>
+    /// <param name="userFeedback">User feedback - thumbs up or down
     /// <param name="tokenUsage">Total token usage of response completion</param>
-    public static CopilotChatMessage CreateBotResponseMessage(string chatId, string content, string prompt, IEnumerable<CitationSource>? citations, IDictionary<string, int>? tokenUsage = null)
+    public static CopilotChatMessage CreateBotResponseMessage(string chatId, string content, string prompt, UserFeedback feedback, IEnumerable<CitationSource>? citations, IDictionary<string, int>? tokenUsage = null)
     {
-        return new CopilotChatMessage("Bot", "Bot", chatId, content, prompt, citations, AuthorRoles.Bot, ChatMessageType.Message, tokenUsage);
+        return new CopilotChatMessage("Bot", "Bot", chatId, content, prompt, feedback, citations, AuthorRoles.Bot, ChatMessageType.Message, tokenUsage);
     }
 
     /// <summary>
@@ -172,7 +201,7 @@ public class CopilotChatMessage : IStorageEntity
     /// <param name="documentMessageContent">The document message content</param>
     public static CopilotChatMessage CreateDocumentMessage(string userId, string userName, string chatId, DocumentMessageContent documentMessageContent)
     {
-        return new CopilotChatMessage(userId, userName, chatId, documentMessageContent.ToString(), string.Empty, null, AuthorRoles.User, ChatMessageType.Document);
+        return new CopilotChatMessage(userId, userName, chatId, documentMessageContent.ToString(), string.Empty, UserFeedback.Unknown, null, AuthorRoles.User, ChatMessageType.Document);
     }
 
     /// <summary>

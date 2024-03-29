@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 using Microsoft.KernelMemory;
 
 namespace CopilotChat.WebApi.Controllers;
@@ -102,6 +103,7 @@ public class ChatHistoryController : ControllerBase
             newChat.Id,
             this._promptOptions.InitialBotMessage,
             string.Empty, // The initial bot message doesn't need a prompt.
+            CopilotChatMessage.UserFeedback.Unknown,
             null,
             TokenUtils.EmptyTokenUsages());
         await this._messageRepository.CreateAsync(chatMessage);
@@ -227,6 +229,44 @@ public class ChatHistoryController : ControllerBase
         }
 
         return this.NotFound($"No chat session found for chat id '{chatId}'.");
+    }
+
+    /// <summary>
+    /// Edit a particular message.
+    /// </summary>
+    /// <param name="msgParameters">Params to edit a message.</param>
+    [HttpPatch]
+    [Route("messages/{chatId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Policy = AuthPolicyName.RequireChatParticipant)]
+    public async Task<IActionResult> UpdateMessageAsync(
+        [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext,
+        [FromBody] EditMessageParameters msgParameters,
+        [FromRoute] Guid chatId)
+    {
+        if (msgParameters.id != null)
+        {
+            Guid messageID = new(msgParameters.id);
+            CopilotChatMessage? msg = null;
+            if (await this._messageRepository.TryFindByIdAsync(messageID.ToString(), chatId.ToString(), callback: v => msg = v))
+            {
+                if (msgParameters.userFeedback != null)
+                {
+                    msg!.userFeedback = (CopilotChatMessage.UserFeedback)msgParameters.userFeedback;
+                    await this._messageRepository.UpsertAsync(msg);
+
+                    return this.Ok(msg);
+                }
+
+                return this.NotFound($"No User Feedback provided to update message '{messageID}'");
+            }
+
+            return this.NotFound($"Could not find Message ID '{messageID}' to update for chat '{chatId}'");
+        }
+
+        return this.NotFound($"Message ID was not sent on update request for chat '{chatId}'.");
     }
 
     /// <summary>

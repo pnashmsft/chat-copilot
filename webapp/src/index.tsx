@@ -78,7 +78,7 @@ export function renderApp() {
             );
             store.dispatch(
                 toggleFeatureState({
-                    feature: FeatureKeys.AzureCognitiveSearch,
+                    feature: FeatureKeys.AzureAISearch,
                     deactivate: lockControl,
                     enable: false,
                 }),
@@ -102,7 +102,7 @@ export function renderApp() {
                 toggleFeatureState({
                     feature: FeatureKeys.RLHF,
                     deactivate: lockControl,
-                    enable: false,
+                    enable: true,
                 }),
             );
 

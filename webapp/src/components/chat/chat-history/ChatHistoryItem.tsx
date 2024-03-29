@@ -16,6 +16,7 @@ import {
     ChevronUp20Regular,
     Clipboard20Regular,
     ClipboardTask20Regular,
+    QuestionRegular,
     ThumbDislikeFilled,
     ThumbLikeFilled,
 } from '@fluentui/react-icons';
@@ -124,6 +125,7 @@ export const ChatHistoryItem: React.FC<ChatHistoryItemProps> = ({ message, messa
         ? DefaultChatUser
         : chat.getChatUserById(message.userName, selectedId, conversations[selectedId].users);
     const fullName = user?.fullName ?? message.userName;
+    const feedback = message.userFeedback ?? UserFeedback.Unknown;
 
     const [messagedCopied, setMessageCopied] = useState(false);
 
@@ -186,6 +188,11 @@ export const ChatHistoryItem: React.FC<ChatHistoryItemProps> = ({ message, messa
                 <div className={classes.header}>
                     {!isMe && <Text weight="semibold">{fullName}</Text>}
                     <Text className={classes.time}>{timestampToDateString(message.timestamp, true)}</Text>
+                    {isBot && feedback === UserFeedback.Positive && <ThumbLikeFilled color="gray" />}
+                    {isBot && feedback === UserFeedback.Negative && <ThumbDislikeFilled color="gray" />}
+                    {isBot && feedback !== UserFeedback.Negative && feedback !== UserFeedback.Positive && (
+                        <QuestionRegular color="gray" />
+                    )}
                     {isBot && <PromptDialog message={message} />}
                     {isBot && message.prompt && (
                         <Tooltip content={messagedCopied ? 'Copied' : 'Copy text'} relationship="label">
@@ -219,17 +226,11 @@ export const ChatHistoryItem: React.FC<ChatHistoryItemProps> = ({ message, messa
                                 }`}
                             </ToggleButton>
                         )}
-                        {<div className={classes.rlhf}>{<UserFeedbackActions messageIndex={messageIndex} />}</div>}
+                        {<div className={classes.rlhf}>{<UserFeedbackActions message={message} />}</div>}
                         {showCitationCards && <CitationCards message={message} />}
                     </div>
                 )}
             </div>
-            {features[FeatureKeys.RLHF].enabled && message.userFeedback === UserFeedback.Positive && (
-                <ThumbLikeFilled color="gray" />
-            )}
-            {features[FeatureKeys.RLHF].enabled && message.userFeedback === UserFeedback.Negative && (
-                <ThumbDislikeFilled color="gray" />
-            )}
         </div>
     );
 };

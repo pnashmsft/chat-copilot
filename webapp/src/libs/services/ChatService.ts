@@ -12,6 +12,13 @@ import { IAskResult } from '../semantic-kernel/model/AskResult';
 import { ICustomPlugin } from '../semantic-kernel/model/CustomPlugin';
 import { BaseService } from './BaseService';
 
+export enum UserFeedback {
+    Unknown,
+    Requested,
+    Positive,
+    Negative,
+}
+
 export class ChatService extends BaseService {
     public createChatAsync = async (title: string, accessToken: string): Promise<ICreateChatSessionResponse> => {
         const body = {
@@ -90,6 +97,36 @@ export class ChatService extends BaseService {
         const result = await this.getResponseAsync<IChatSession>(
             {
                 commandPath: `chats/${chatId}`,
+                method: 'PATCH',
+                body,
+            },
+            accessToken,
+        );
+
+        return result;
+    };
+
+    public updateChatMessageAsync = async (
+        message: IChatMessage,
+        feedback: UserFeedback,
+        accessToken: string,
+    ): Promise<any> => {
+        const body: IChatMessage = {
+            chatId: message.chatId,
+            type: message.type,
+            timestamp: message.timestamp,
+            userName: message.userName,
+            userId: message.userId,
+            content: '',
+            id: message.id,
+            authorRole: message.authorRole,
+            userFeedback: feedback,
+        };
+        const chatID = message.chatId;
+
+        const result = await this.getResponseAsync<IChatMessage>(
+            {
+                commandPath: `messages/${chatID}`,
                 method: 'PATCH',
                 body,
             },
