@@ -1,6 +1,7 @@
-import { Button, Text, Tooltip, makeStyles } from '@fluentui/react-components';
+import { Button, Tooltip, makeStyles } from '@fluentui/react-components';
 import { useCallback, useState } from 'react';
-import { UserFeedback } from '../../../libs/models/ChatMessage';
+import { useChat } from '../../../libs/hooks';
+import { IChatMessage, UserFeedback } from '../../../libs/models/ChatMessage';
 import { useAppDispatch, useAppSelector } from '../../../redux/app/hooks';
 import { RootState } from '../../../redux/app/store';
 import { updateMessageProperty } from '../../../redux/features/conversations/conversationsSlice';
@@ -15,10 +16,11 @@ const useClasses = makeStyles({
 });
 
 interface IUserFeedbackProps {
-    messageIndex: number;
+    message: IChatMessage;
 }
 
-export const UserFeedbackActions: React.FC<IUserFeedbackProps> = ({ messageIndex }) => {
+export const UserFeedbackActions: React.FC<IUserFeedbackProps> = ({ message }) => {
+    const chat = useChat();
     const [thumbsUpAppearance, setThumbsUpAppearance] = useState<
         'secondary' | 'primary' | 'outline' | 'subtle' | 'transparent'
     >();
@@ -40,25 +42,27 @@ export const UserFeedbackActions: React.FC<IUserFeedbackProps> = ({ messageIndex
                 setThumbsDownAppearance('primary');
             }
 
+            const messageID = typeof message.id === 'string' ? message.id : 0;
+            const feedback = positive ? UserFeedback.Positive : UserFeedback.Negative;
+
             dispatch(
                 updateMessageProperty({
                     chatId: selectedId,
-                    messageIdOrIndex: messageIndex,
+                    messageIdOrIndex: messageID,
                     property: 'userFeedback',
-                    value: positive ? UserFeedback.Positive : UserFeedback.Negative,
+                    value: feedback,
                     frontLoad: true,
                 }),
             );
+
+            // Persist to database
+            void chat.updateChatMessage(message, feedback);
         },
-        [dispatch, messageIndex, selectedId],
+        [chat, dispatch, message, selectedId],
     );
 
     return (
         <div className={classes.root}>
-            <Text color="gray" size={200} align="start">
-                AI-generated content may be incorrect
-            </Text>
-            <p>&nbsp;&nbsp;&nbsp;</p>
             <Tooltip content={'Like bot message'} relationship="label">
                 <Button
                     icon={<ThumbLike16 />}

@@ -46,6 +46,13 @@ export interface GetResponseOptions {
     processPlan?: boolean;
 }
 
+export enum UserFeedback {
+    Unknown,
+    Requested,
+    Positive,
+    Negative,
+}
+
 export const useChat = () => {
     const dispatch = useAppDispatch();
     const { instance, inProgress } = useMsal();
@@ -384,6 +391,19 @@ export const useChat = () => {
         }
     };
 
+    const updateChatMessage = async (message: IChatMessage, feedback: UserFeedback) => {
+        try {
+            await chatService.updateChatMessageAsync(
+                message,
+                feedback,
+                await AuthHelper.getSKaaSAccessToken(instance, inProgress),
+            );
+        } catch (e: any) {
+            const errorMessage = `Error updating feedback response for message ${message.id}. Details: ${getErrorDetails(e)}`;
+            dispatch(addAlert({ message: errorMessage, type: AlertType.Error }));
+        }
+    };
+
     const getServiceInfo = async () => {
         try {
             return await chatService.getServiceInfoAsync(await AuthHelper.getSKaaSAccessToken(instance, inProgress));
@@ -462,6 +482,7 @@ export const useChat = () => {
         joinChat,
         editChat,
         getServiceInfo,
+        updateChatMessage,
         deleteChat,
         processPlan,
     };

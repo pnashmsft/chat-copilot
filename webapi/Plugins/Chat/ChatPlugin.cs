@@ -470,6 +470,7 @@ public class ChatPlugin
             chatId,
             message,
             string.Empty,
+            CopilotChatMessage.UserFeedback.Unknown,
             null,
             CopilotChatMessage.AuthorRoles.User,
             // Default to a standard message if the `type` is not recognized
@@ -488,6 +489,7 @@ public class ChatPlugin
     /// <param name="prompt">Prompt used to generate the response.</param>
     /// <param name="chatId">The chat ID</param>
     /// <param name="userId">The user ID</param>
+    /// <param name="userFeedback">User feedback - thumbs up or down
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="tokenUsage">Total token usage of response completion</param>
     /// <param name="citations">Citations for the message</param>
@@ -497,6 +499,7 @@ public class ChatPlugin
         string prompt,
         string chatId,
         string userId,
+        CopilotChatMessage.UserFeedback userFeedback,
         CancellationToken cancellationToken,
         Dictionary<string, int>? tokenUsage = null,
         IEnumerable<CitationSource>? citations = null
@@ -513,6 +516,7 @@ public class ChatPlugin
             chatId,
             userId,
             prompt,
+            userFeedback,
             response,
             cancellationToken,
             citations,
@@ -649,6 +653,7 @@ public class ChatPlugin
             chatId,
             userId,
             JsonSerializer.Serialize(prompt),
+            CopilotChatMessage.UserFeedback.Unknown,
             string.Empty,
             cancellationToken,
             citations
@@ -670,6 +675,7 @@ public class ChatPlugin
     /// <param name="chatId">The chat ID</param>
     /// <param name="userId">The user ID</param>
     /// <param name="prompt">Prompt used to generate the message</param>
+    /// <param name="userFeedback">User feedback - thumbs up or down
     /// <param name="content">Content of the message</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="citations">Citations for the message</param>
@@ -679,12 +685,13 @@ public class ChatPlugin
         string chatId,
         string userId,
         string prompt,
+        CopilotChatMessage.UserFeedback feedback,
         string content,
         CancellationToken cancellationToken,
         IEnumerable<CitationSource>? citations = null,
         Dictionary<string, int>? tokenUsage = null)
     {
-        var chatMessage = CopilotChatMessage.CreateBotResponseMessage(chatId, content, prompt, citations, tokenUsage);
+        var chatMessage = CopilotChatMessage.CreateBotResponseMessage(chatId, content, prompt, feedback, citations, tokenUsage);
         await this._messageRelayHubContext.Clients.Group(chatId).SendAsync("ReceiveMessage", chatId, userId, chatMessage, cancellationToken);
         return chatMessage;
     }
