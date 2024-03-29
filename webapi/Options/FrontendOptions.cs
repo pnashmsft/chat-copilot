@@ -22,7 +22,8 @@ public sealed class FrontendOptions
     public string HeaderIcon { get; set; } = string.Empty;
     public Boolean HeaderSettingsEnabled { get; set; } = false;
     public Boolean HeaderPluginsEnabled { get; set; } = false;
-    public Boolean DocumentUploadEnabled { get; set; } = false;
+    public Boolean DocumentLocalUploadEnabled { get; set; } = false;
+    public Boolean DocumentGlobalUploadEnabled { get; set; } = false;
     public Boolean CreateNewChat { get; set; } = false;
     public string DisclaimerMsg { get; set; } = string.Empty;
 }

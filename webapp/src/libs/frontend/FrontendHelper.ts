@@ -7,7 +7,8 @@ export interface FrontendConfig {
     headerIcon: string;
     headerSettingsEnabled: boolean;
     headerPluginsEnabled: boolean;
-    documentUploadEnabled: boolean;
+    documentLocalUploadEnabled: boolean;
+    documentGlobalUploadEnabled: boolean;
     createNewChat: boolean;
     disclaimerMsg: string;
 }

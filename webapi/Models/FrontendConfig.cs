@@ -26,8 +26,10 @@ public class FrontendConfig
   [JsonPropertyName("headerPluginsEnabled")]
   public Boolean HeaderPluginsEnabled { get; set; } = false;
 
-  [JsonPropertyName("documentUploadEnabled")]
-  public Boolean DocumentUploadEnabled { get; set; } = false;
+  [JsonPropertyName("documentLocalUploadEnabled")]
+  public Boolean DocumentLocalUploadEnabled { get; set; } = false;
+  [JsonPropertyName("documentGlobalUploadEnabled")]
+  public Boolean DocumentGlobalUploadEnabled { get; set; } = false;
 
   [JsonPropertyName("createNewChat")]
   public Boolean CreateNewChat { get; set; } = false;
