@@ -21,10 +21,11 @@ import {
     shorthands,
     tokens,
 } from '@fluentui/react-components';
-import React from 'react';
-import { useUserSettings } from '../../../../src/libs/hooks';
+import React, { useCallback } from 'react';
+import { useUserSettings } from '../../../libs/hooks/useUserSettings';
 import { useAppSelector } from '../../../redux/app/hooks';
 import { RootState } from '../../../redux/app/store';
+import { FeatureKeys } from '../../../redux/features/app/AppState';
 import { SharedStyles, useDialogClasses } from '../../../styles';
 import { TokenUsageGraph } from '../../token-usage/TokenUsageGraph';
 import { SettingSection } from './SettingSection';
@@ -49,12 +50,6 @@ const useClasses = makeStyles({
     },
 });
 
-const saveUserSettings = () => {
-    const userSettingsHandler = useUserSettings();
-
-    void userSettingsHandler.updateUserSettings();
-};
-
 interface ISettingsDialogProps {
     open: boolean;
     closeDialog: () => void;
@@ -62,8 +57,30 @@ interface ISettingsDialogProps {
 
 export const SettingsDialog: React.FC<ISettingsDialogProps> = ({ open, closeDialog }) => {
     const classes = useClasses();
+    const userSettingsHandler = useUserSettings();
     const dialogClasses = useDialogClasses();
     const { serviceInfo, settings, tokenUsage } = useAppSelector((state: RootState) => state.app);
+    const { activeUserInfo, features } = useAppSelector((state: RootState) => state.app);
+
+    const onSaveUserSettings = useCallback(() => {
+        if (activeUserInfo != undefined) {
+            void userSettingsHandler
+                .updateUserSettings(
+                    activeUserInfo.id,
+                    features[FeatureKeys.DarkMode].enabled,
+                    features[FeatureKeys.PluginsPlannersAndPersonas].enabled,
+                    features[FeatureKeys.SimplifiedExperience].enabled,
+                    features[FeatureKeys.AzureContentSafety].enabled,
+                    features[FeatureKeys.AzureAISearch].enabled,
+                    features[FeatureKeys.ExportChatSessions].enabled,
+                    features[FeatureKeys.LiveChatSessionSharing].enabled,
+                    features[FeatureKeys.RLHF].enabled,
+                )
+                .then(() => {});
+        } else {
+            console.error('Unable to save user settings.');
+        }
+    }, [activeUserInfo, features, userSettingsHandler]);
 
     return (
         <Dialog
@@ -127,7 +144,11 @@ export const SettingsDialog: React.FC<ISettingsDialogProps> = ({ open, closeDial
                         </a>
                     </Label>
                     <DialogTrigger disableButtonEnhancement>
-                        <Button appearance="secondary" data-testid="userSettingsCloseButton" onClick={saveUserSettings}>
+                        <Button
+                            appearance="secondary"
+                            data-testid="userSettingsCloseButton"
+                            onClick={onSaveUserSettings}
+                        >
                             Close
                         </Button>
                     </DialogTrigger>

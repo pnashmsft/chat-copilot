@@ -7,17 +7,31 @@ export class UserSettingsService extends BaseService {
     public updateUserSettingsAsync = async (
         userId: string,
         darkMode: boolean,
+        plannersAndPersonas: boolean,
+        simplifiedChatExperience: boolean,
+        azureContentSafety: boolean,
+        azureAISearch: boolean,
+        exportChatSessions: boolean,
+        liveChatSessionSharing: boolean,
+        feedbackFromUser: boolean,
         accessToken: string,
     ): Promise<IUserSettings> => {
         const body = {
             userId,
             darkMode,
+            plannersAndPersonas,
+            simplifiedChatExperience,
+            azureContentSafety,
+            azureAISearch,
+            exportChatSessions,
+            liveChatSessionSharing,
+            feedbackFromUser,
         };
 
         const result = await this.getResponseAsync<IUserSettings>(
             {
                 commandPath: `settings/${userId}`,
-                method: 'POST',
+                method: 'PATCH',
                 body,
             },
             accessToken,

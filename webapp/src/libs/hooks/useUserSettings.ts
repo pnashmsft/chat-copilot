@@ -13,19 +13,36 @@ export const useUserSettings = () => {
     const { instance, inProgress } = useMsal();
     const userSettingsService = new UserSettingsService();
 
-    const updateUserSettings = async (userId: string, darkMode: boolean) => {
+    const updateUserSettings = async (
+        userId: string,
+        darkMode: boolean,
+        plannersAndPersonas: boolean,
+        simplifiedChatExperience: boolean,
+        azureContentSafety: boolean,
+        azureAISearch: boolean,
+        exportChatSessions: boolean,
+        liveChatSessionSharing: boolean,
+        feedbackFromUser: boolean,
+    ) => {
         try {
             return await userSettingsService.updateUserSettingsAsync(
                 userId,
                 darkMode,
+                plannersAndPersonas,
+                simplifiedChatExperience,
+                azureContentSafety,
+                azureAISearch,
+                exportChatSessions,
+                liveChatSessionSharing,
+                feedbackFromUser,
                 await AuthHelper.getSKaaSAccessToken(instance, inProgress),
             );
         } catch (e: any) {
-            const errorMessage = `Unable to settings record for user. Details: ${getErrorDetails(e)}`;
+            const errorMessage = `Unable to update settings record for user. Details: ${getErrorDetails(e)}`;
             dispatch(addAlert({ message: errorMessage, type: AlertType.Error }));
         }
 
-        return [];
+        return undefined;
     };
 
     const getUserSettings = async (userId: string) => {
@@ -39,7 +56,7 @@ export const useUserSettings = () => {
             dispatch(addAlert({ message: errorMessage, type: AlertType.Error }));
         }
 
-        return [];
+        return undefined;
     };
 
     return {

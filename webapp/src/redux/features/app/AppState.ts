@@ -51,6 +51,17 @@ export interface Setting {
     learnMoreLink?: string;
 }
 
+export interface UserSettings {
+    darkMode: boolean;
+    plannersAndPersonas: boolean;
+    simplifiedChatExperience: boolean;
+    azureContentSafety: boolean;
+    azureAISearch: boolean;
+    exportChatSessions: boolean;
+    liveChatSessionSharing: boolean;
+    feedbackFromUser: boolean;
+}
+
 export interface AppState {
     alerts: Alert[];
     activeUserInfo?: ActiveUserInfo;
@@ -61,6 +72,7 @@ export interface AppState {
     settings: Setting[];
     serviceInfo: ServiceInfo;
     isMaintenance: boolean;
+    userSettings?: UserSettings | null;
 }
 
 export enum FeatureKeys {
@@ -71,6 +83,8 @@ export enum FeatureKeys {
     AzureAISearch,
     BotAsDocs,
     MultiUserChat,
+    ExportChatSessions,
+    LiveChatSessionSharing,
     RLHF, // Reinforcement Learning from Human Feedback
 }
 
@@ -81,12 +95,12 @@ export const Features = {
         inactive: false,
     },
     [FeatureKeys.SimplifiedExperience]: {
-        enabled: true,
+        enabled: false,
         label: 'Simplified Chat Experience',
         inactive: false,
     },
     [FeatureKeys.PluginsPlannersAndPersonas]: {
-        enabled: true,
+        enabled: false,
         label: 'Planners & Personas',
         description: 'The Plans and Persona tabs are hidden until you turn this on',
         inactive: false,
@@ -112,8 +126,20 @@ export const Features = {
         inactive: false,
         description: 'Enable multi-user chat sessions. Not available when authorization is disabled.',
     },
+    [FeatureKeys.ExportChatSessions]: {
+        enabled: false,
+        label: 'Export Chat Sessions',
+        inactive: false,
+        description: 'Enable chat session export.',
+    },
+    [FeatureKeys.LiveChatSessionSharing]: {
+        enabled: false,
+        label: 'Live Chat Sesssion Sharing',
+        inactive: false,
+        description: 'Enable chat session sharing.',
+    },
     [FeatureKeys.RLHF]: {
-        enabled: true,
+        enabled: false,
         label: 'Reinforcement Learning from Human Feedback',
         inactive: false,
         description: 'Enable users to vote on model-generated responses. For demonstration purposes only.',
@@ -160,4 +186,5 @@ export const initialState: AppState = {
         isContentSafetyEnabled: false,
     },
     isMaintenance: false,
+    userSettings: {} as UserSettings,
 };

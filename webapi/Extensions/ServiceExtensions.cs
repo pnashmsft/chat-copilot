@@ -179,6 +179,7 @@ public static class CopilotChatServiceExtensions
                 chatMessageStorageContext = new VolatileContext<CopilotChatMessage>();
                 chatMemorySourceStorageContext = new VolatileContext<MemorySource>();
                 chatParticipantStorageContext = new VolatileContext<ChatParticipant>();
+                userSettingsStorageContext = new VolatileContext<UserSettings>();
                 break;
             }
 
@@ -236,6 +237,7 @@ public static class CopilotChatServiceExtensions
         services.AddSingleton<ChatMessageRepository>(new ChatMessageRepository(chatMessageStorageContext));
         services.AddSingleton<ChatMemorySourceRepository>(new ChatMemorySourceRepository(chatMemorySourceStorageContext));
         services.AddSingleton<ChatParticipantRepository>(new ChatParticipantRepository(chatParticipantStorageContext));
+        services.AddSingleton<UserSettingsRepository>(new UserSettingsRepository(userSettingsStorageContext));
 
         return services;
     }

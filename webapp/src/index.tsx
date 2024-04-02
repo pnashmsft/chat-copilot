@@ -90,10 +90,23 @@ export function renderApp() {
                     enable: false,
                 }),
             );
-
             store.dispatch(
                 toggleFeatureState({
                     feature: FeatureKeys.MultiUserChat,
+                    deactivate: lockControl,
+                    enable: false,
+                }),
+            );
+            store.dispatch(
+                toggleFeatureState({
+                    feature: FeatureKeys.ExportChatSessions,
+                    deactivate: lockControl,
+                    enable: false,
+                }),
+            );
+            store.dispatch(
+                toggleFeatureState({
+                    feature: FeatureKeys.LiveChatSessionSharing,
                     deactivate: lockControl,
                     enable: false,
                 }),

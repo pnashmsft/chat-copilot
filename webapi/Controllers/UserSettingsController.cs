@@ -47,7 +47,15 @@ public class UserSettingsController : ControllerBase
     {
         var settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
 
-        return this.Ok(settings);
+        foreach (var setting in settings)
+        {
+            UserSettings us = new(setting.UserId, setting.DarkMode, setting.PlannersAndPersonas, setting.SimplifiedChatExperience,
+            setting.AzureContentSafety, setting.AzureAISearch, setting.ExportChatSessions, setting.LiveChatSessionSharing,
+            setting.FeedbackFromUser);
+            return this.Ok(us);  // Only 1 record per user id
+        }
+
+        return this.NotFound("Did not find any user specific settings.");
     }
 
     /// <summary>
@@ -65,21 +73,31 @@ public class UserSettingsController : ControllerBase
     {
         if (msgParameters.userId != null)
         {
-            UserSettings? us = (UserSettings?)await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
-            if (us != null)
+            var settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
+
+            foreach (var setting in settings)
             {
                 // Update existing settings record for this user
-                us!.DarkMode = msgParameters.darkMode;
-                await this._userSettingsRepository.UpsertAsync(us);
+                setting!.DarkMode = msgParameters.darkMode;
+                setting!.PlannersAndPersonas = msgParameters.plannersAndPersonas;
+                setting!.SimplifiedChatExperience = msgParameters.simplifiedChatExperience;
+                setting!.AzureContentSafety = msgParameters.azureContentSafety;
+                setting!.AzureAISearch = msgParameters.azureAISearch;
+                setting!.ExportChatSessions = msgParameters.exportChatSessions;
+                setting!.LiveChatSessionSharing = msgParameters.liveChatSessionSharing;
+                setting!.FeedbackFromUser = msgParameters.feedbackFromUser;
+                await this._userSettingsRepository.UpsertAsync(setting);
 
-                return this.Ok(us);
+                return this.Ok(setting);
             }
 
             // Create a new settings record for this user 
-            var newUserSettings = new UserSettings(msgParameters.userId, msgParameters.darkMode);
-            await this._userSettingsRepository.createUserSettings(newUserSettings);
+            var newUserSettings = new UserSettings(msgParameters.userId, msgParameters.darkMode, msgParameters.plannersAndPersonas,
+            msgParameters.simplifiedChatExperience, msgParameters.azureContentSafety, msgParameters.azureAISearch, msgParameters.exportChatSessions,
+            msgParameters.liveChatSessionSharing, msgParameters.feedbackFromUser);
+            await this._userSettingsRepository.CreateAsync(newUserSettings);
 
-            return this.Ok(us);
+            return this.Ok(newUserSettings);
         }
 
         return this.NotFound("User ID was not sent to update user settings'.");
