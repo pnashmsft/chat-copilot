@@ -44,4 +44,10 @@ public class CosmosOptions
     /// </summary>
     [Required, NotEmptyOrWhitespace]
     public string ChatParticipantsContainer { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the Cosmos container for user settings.
+    /// </summary>
+    [Required, NotEmptyOrWhitespace]
+    public string UserSettingsContainer { get; set; } = string.Empty;
 }

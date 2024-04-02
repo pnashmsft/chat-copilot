@@ -6,17 +6,24 @@ import { FluentProvider, makeStyles, shorthands, tokens } from '@fluentui/react-
 import * as React from 'react';
 import { useEffect } from 'react';
 
-import logo from './assets/frontend-icons/FullVALogo.png';
+import logo from './assets/frontend-icons/yourLogo.png';
 import { UserSettingsMenu } from './components/header/UserSettingsMenu';
 import { PluginGallery } from './components/open-api-plugins/PluginGallery';
 import { BackendProbe, ChatView, Error, Loading, Login } from './components/views';
 import { AuthHelper } from './libs/auth/AuthHelper';
 import { useChat, useFile } from './libs/hooks';
+import { useUserSettings } from './libs/hooks/useUserSettings';
 import { AlertType } from './libs/models/AlertType';
 import { useAppDispatch, useAppSelector } from './redux/app/hooks';
 import { RootState, store } from './redux/app/store';
-import { FeatureKeys } from './redux/features/app/AppState';
-import { addAlert, setActiveUserInfo, setServiceInfo } from './redux/features/app/appSlice';
+import { DefaultChatUser, FeatureKeys } from './redux/features/app/AppState';
+import {
+    addAlert,
+    setActiveUserInfo,
+    setServiceInfo,
+    setUserSettings,
+    toggleFeatureFlag,
+} from './redux/features/app/appSlice';
 import { semanticKernelDarkTheme, semanticKernelLightTheme } from './styles';
 
 export const useClasses = makeStyles({
@@ -57,6 +64,7 @@ enum AppState {
     LoadingChats,
     Chat,
     SigningOut,
+    UserSettings,
 }
 
 const App = () => {
@@ -69,6 +77,7 @@ const App = () => {
     const { instance, inProgress } = useMsal();
     const { features, isMaintenance } = useAppSelector((state: RootState) => state.app);
     const isAuthenticated = useIsAuthenticated();
+    const userSettingsHandler = useUserSettings();
 
     const chat = useChat();
     const file = useFile();
@@ -105,6 +114,21 @@ const App = () => {
                     );
                 }
 
+                setAppState(AppState.UserSettings);
+                void userSettingsHandler.getUserSettings(account.localAccountId).then((us) => {
+                    if (us !== undefined) {
+                        dispatch(setUserSettings(us));
+                        if (us.darkMode) dispatch(toggleFeatureFlag(FeatureKeys.DarkMode)); // Turn on
+                        if (us.plannersAndPersonas) dispatch(toggleFeatureFlag(FeatureKeys.PluginsPlannersAndPersonas)); // Turn on
+                        if (us.simplifiedChatExperience) dispatch(toggleFeatureFlag(FeatureKeys.SimplifiedExperience)); // Turn on
+                        if (us.azureContentSafety) dispatch(toggleFeatureFlag(FeatureKeys.AzureContentSafety)); // Turn on
+                        if (us.azureAISearch) dispatch(toggleFeatureFlag(FeatureKeys.AzureAISearch)); // Turn on
+                        if (us.exportChatSessions) dispatch(toggleFeatureFlag(FeatureKeys.ExportChatSessions)); // Turn on
+                        if (us.liveChatSessionSharing) dispatch(toggleFeatureFlag(FeatureKeys.LiveChatSessionSharing)); // Turn on
+                        if (us.feedbackFromUser) dispatch(toggleFeatureFlag(FeatureKeys.RLHF)); // Turn on
+                    }
+                });
+
                 setAppState(AppState.LoadingChats);
             }
         }
@@ -131,13 +155,31 @@ const App = () => {
                     }
                 }),
             ]);
+
+            if (!AuthHelper.isAuthAAD()) {
+                setAppState(AppState.UserSettings);
+                // Use default User ID
+                void userSettingsHandler.getUserSettings(DefaultChatUser.id).then((us) => {
+                    if (us !== undefined) {
+                        dispatch(setUserSettings(us));
+                        if (us.darkMode) dispatch(toggleFeatureFlag(FeatureKeys.DarkMode)); // Turn on
+                        if (us.plannersAndPersonas) dispatch(toggleFeatureFlag(FeatureKeys.PluginsPlannersAndPersonas)); // Turn on
+                        if (us.simplifiedChatExperience) dispatch(toggleFeatureFlag(FeatureKeys.SimplifiedExperience)); // Turn on
+                        if (us.azureContentSafety) dispatch(toggleFeatureFlag(FeatureKeys.AzureContentSafety)); // Turn on
+                        if (us.azureAISearch) dispatch(toggleFeatureFlag(FeatureKeys.AzureAISearch)); // Turn on
+                        if (us.exportChatSessions) dispatch(toggleFeatureFlag(FeatureKeys.ExportChatSessions)); // Turn on
+                        if (us.liveChatSessionSharing) dispatch(toggleFeatureFlag(FeatureKeys.LiveChatSessionSharing)); // Turn on
+                        if (us.feedbackFromUser) dispatch(toggleFeatureFlag(FeatureKeys.RLHF)); // Turn on
+                    }
+                });
+            }
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [instance, inProgress, isAuthenticated, appState, isMaintenance]);
 
     useEffect(() => {
-        const title = pageTitle ?? 'VA Chat Copilot';
+        const title = pageTitle ?? 'Chat Copilot';
 
         document.title = title;
     }, [pageTitle]);
@@ -231,6 +273,7 @@ const Chat = ({
             {appState === AppState.SettingUserInfo && (
                 <Loading text={'Hang tight while we fetch your information...'} />
             )}
+            {appState === AppState.UserSettings && <Loading text={'Please wait while we fetch your settings...'} />}
             {appState === AppState.ErrorLoadingUserInfo && (
                 <Error text={'Unable to load user info. Please try signing out and signing back in.'} />
             )}

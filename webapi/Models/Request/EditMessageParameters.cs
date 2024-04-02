@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace CopilotChat.WebApi.Models.Request;
 
@@ -7,24 +7,23 @@ namespace CopilotChat.WebApi.Models.Request;
 /// </summary>
 public class EditMessageParameters
 {
-  public enum UserFeedback
-  {
-    Unknown,
-    Requested,
-    Positive,
-    Negative,
-  }
+    public enum UserFeedbackTypes
+    {
+        Unknown,
+        Requested,
+        Positive,
+        Negative
+    }
 
-  /// <summary>
-  /// Message ID
-  /// </summary>
-  [JsonPropertyName("id")]
-  public string? id { get; set; }
+    /// <summary>
+    /// Message ID
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? id { get; set; }
 
-  /// <summary>
-  /// User Feedback
-  /// </summary>
-  [JsonPropertyName("userFeedback")]
-  public UserFeedback? userFeedback { get; set; }
-
+    /// <summary>
+    /// User Feedback
+    /// </summary>
+    [JsonPropertyName("userFeedback")]
+    public UserFeedbackTypes? userFeedback { get; set; }
 }
