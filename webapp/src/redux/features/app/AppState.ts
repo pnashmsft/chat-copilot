@@ -101,7 +101,7 @@ export const Features = {
         inactive: false,
     },
     [FeatureKeys.SimplifiedExperience]: {
-        enabled: false,
+        enabled: true,
         label: 'Simplified Chat Experience',
         inactive: false,
     },
