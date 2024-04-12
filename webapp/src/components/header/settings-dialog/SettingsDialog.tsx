@@ -68,13 +68,16 @@ export const SettingsDialog: React.FC<ISettingsDialogProps> = ({ open, closeDial
                 .updateUserSettings(
                     activeUserInfo.id,
                     features[FeatureKeys.DarkMode].enabled,
-                    features[FeatureKeys.PluginsPlannersAndPersonas].enabled,
+                    features[FeatureKeys.Planners].enabled,
+                    features[FeatureKeys.Personas].enabled,
                     features[FeatureKeys.SimplifiedExperience].enabled,
                     features[FeatureKeys.AzureContentSafety].enabled,
                     features[FeatureKeys.AzureAISearch].enabled,
                     features[FeatureKeys.ExportChatSessions].enabled,
                     features[FeatureKeys.LiveChatSessionSharing].enabled,
                     features[FeatureKeys.RLHF].enabled,
+                    features[FeatureKeys.DeploymentGPT35].enabled,
+                    features[FeatureKeys.DeploymentGPT4].enabled,
                 )
                 .then(() => {});
         } else {

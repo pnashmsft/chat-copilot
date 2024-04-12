@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
@@ -29,6 +30,12 @@ namespace CopilotChat.WebApi.Extensions;
 /// </summary>
 internal static class SemanticKernelExtensions
 {
+    public enum SemanticProvider
+    {
+        gpt35turbo = 0,
+        gpt4 = 1
+    }
+
     /// <summary>
     /// Delegate to register functions with a Semantic Kernel
     /// </summary>
@@ -117,9 +124,37 @@ internal static class SemanticKernelExtensions
         return kernel;
     }
 
+    public static WebApplicationBuilder ReplaceKernelServices(this WebApplicationBuilder builder, string deploymentName)
+    {
+        // Swap out the kernel provider service with this one to use a different Azure OpenAI Deployment Name updated by the user
+        ServiceDescriptor descriptorProvider = ServiceDescriptor.Singleton(typeof(SemanticKernelProvider),
+                                        sp => new SemanticKernelProvider(sp, builder.Configuration, sp.GetRequiredService<IHttpClientFactory>(), deploymentName));
+        builder.Services.Replace(descriptorProvider);
+
+        // Swap out the kernel service
+        ServiceDescriptor descriptorKernel = ServiceDescriptor.Scoped(typeof(Kernel), sp =>
+            {
+                var provider = sp.GetRequiredService<SemanticKernelProvider>();
+                var kernel = provider.GetCompletionKernel();
+
+                sp.GetRequiredService<RegisterFunctionsWithKernel>()(sp, kernel);
+
+                // If KernelSetupHook is not null, invoke custom kernel setup.
+                sp.GetService<KernelSetupHook>()?.Invoke(sp, kernel);
+                return kernel;
+            });
+
+        builder.Services.Replace(descriptorKernel);
+
+        return builder;
+    }
+
     private static void InitializeKernelProvider(this WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton(sp => new SemanticKernelProvider(sp, builder.Configuration, sp.GetRequiredService<IHttpClientFactory>()));
+        builder.Services.AddSingleton(sp => new SemanticKernelProvider(sp, builder.Configuration, sp.GetRequiredService<IHttpClientFactory>(), null));
+
+        //      SemanticKernelProvider skp => new(skp, builder.Configuration, skp.GetRequiredService<IHttpClientFactory>(), "gpt-35-turbro");
+        //      builder.Services.AddKeyedSingleton<SemanticKernelProvider>("gpt-35-turbro", skp);
     }
 
     /// <summary>

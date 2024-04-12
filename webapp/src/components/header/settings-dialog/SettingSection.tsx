@@ -28,6 +28,7 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
     const classes = useClasses();
     const { features } = useAppSelector((state: RootState) => state.app);
     const dispatch = useAppDispatch();
+    let togglingDeployment = false;
 
     const onFeatureChange = useCallback(
         (featureKey: FeatureKeys) => {
@@ -65,6 +66,16 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
                                 }
                                 onChange={() => {
                                     onFeatureChange(key);
+
+                                    if (!togglingDeployment) {
+                                        togglingDeployment = true;
+                                        if (key === FeatureKeys.DeploymentGPT35) {
+                                            onFeatureChange(FeatureKeys.DeploymentGPT4);
+                                        } else if (key === FeatureKeys.DeploymentGPT4) {
+                                            onFeatureChange(FeatureKeys.DeploymentGPT35);
+                                        }
+                                        togglingDeployment = false;
+                                    }
                                 }}
                                 data-testid={feature.label}
                             />

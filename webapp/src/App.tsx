@@ -119,13 +119,16 @@ const App = () => {
                     if (us !== undefined) {
                         dispatch(setUserSettings(us));
                         if (us.darkMode) dispatch(toggleFeatureFlag(FeatureKeys.DarkMode)); // Turn on
-                        if (us.plannersAndPersonas) dispatch(toggleFeatureFlag(FeatureKeys.PluginsPlannersAndPersonas)); // Turn on
+                        if (us.planners) dispatch(toggleFeatureFlag(FeatureKeys.Planners)); // Turn on
+                        if (us.personas) dispatch(toggleFeatureFlag(FeatureKeys.Personas)); // Turn on
                         if (us.simplifiedChatExperience) dispatch(toggleFeatureFlag(FeatureKeys.SimplifiedExperience)); // Turn on
                         if (us.azureContentSafety) dispatch(toggleFeatureFlag(FeatureKeys.AzureContentSafety)); // Turn on
                         if (us.azureAISearch) dispatch(toggleFeatureFlag(FeatureKeys.AzureAISearch)); // Turn on
                         if (us.exportChatSessions) dispatch(toggleFeatureFlag(FeatureKeys.ExportChatSessions)); // Turn on
                         if (us.liveChatSessionSharing) dispatch(toggleFeatureFlag(FeatureKeys.LiveChatSessionSharing)); // Turn on
                         if (us.feedbackFromUser) dispatch(toggleFeatureFlag(FeatureKeys.RLHF)); // Turn on
+                        if (us.deploymentGPT35) dispatch(toggleFeatureFlag(FeatureKeys.DeploymentGPT35)); // Turn on
+                        if (us.deploymentGPT4) dispatch(toggleFeatureFlag(FeatureKeys.DeploymentGPT4)); // Turn on
                     }
                 });
 
@@ -163,13 +166,16 @@ const App = () => {
                     if (us !== undefined) {
                         dispatch(setUserSettings(us));
                         if (us.darkMode) dispatch(toggleFeatureFlag(FeatureKeys.DarkMode)); // Turn on
-                        if (us.plannersAndPersonas) dispatch(toggleFeatureFlag(FeatureKeys.PluginsPlannersAndPersonas)); // Turn on
+                        if (us.planners) dispatch(toggleFeatureFlag(FeatureKeys.Planners)); // Turn on
+                        if (us.personas) dispatch(toggleFeatureFlag(FeatureKeys.Personas)); // Turn on
                         if (us.simplifiedChatExperience) dispatch(toggleFeatureFlag(FeatureKeys.SimplifiedExperience)); // Turn on
                         if (us.azureContentSafety) dispatch(toggleFeatureFlag(FeatureKeys.AzureContentSafety)); // Turn on
                         if (us.azureAISearch) dispatch(toggleFeatureFlag(FeatureKeys.AzureAISearch)); // Turn on
                         if (us.exportChatSessions) dispatch(toggleFeatureFlag(FeatureKeys.ExportChatSessions)); // Turn on
                         if (us.liveChatSessionSharing) dispatch(toggleFeatureFlag(FeatureKeys.LiveChatSessionSharing)); // Turn on
                         if (us.feedbackFromUser) dispatch(toggleFeatureFlag(FeatureKeys.RLHF)); // Turn on
+                        if (us.deploymentGPT35) dispatch(toggleFeatureFlag(FeatureKeys.DeploymentGPT35)); // Turn on
+                        if (us.deploymentGPT4) dispatch(toggleFeatureFlag(FeatureKeys.DeploymentGPT4)); // Turn on
                     }
                 });
             }

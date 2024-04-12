@@ -57,7 +57,14 @@ export function renderApp() {
             );
             store.dispatch(
                 toggleFeatureState({
-                    feature: FeatureKeys.PluginsPlannersAndPersonas,
+                    feature: FeatureKeys.Planners,
+                    deactivate: lockControl,
+                    enable: false,
+                }),
+            );
+            store.dispatch(
+                toggleFeatureState({
+                    feature: FeatureKeys.Personas,
                     deactivate: lockControl,
                     enable: false,
                 }),
@@ -116,6 +123,22 @@ export function renderApp() {
                     feature: FeatureKeys.RLHF,
                     deactivate: lockControl,
                     enable: true,
+                }),
+            );
+
+            store.dispatch(
+                toggleFeatureState({
+                    feature: FeatureKeys.DeploymentGPT35,
+                    deactivate: lockControl,
+                    enable: true,
+                }),
+            );
+
+            store.dispatch(
+                toggleFeatureState({
+                    feature: FeatureKeys.DeploymentGPT4,
+                    deactivate: lockControl,
+                    enable: false,
                 }),
             );
 

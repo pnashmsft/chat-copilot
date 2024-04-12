@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CopilotChat.WebApi.Auth;
+using CopilotChat.WebApi.Extensions;
 using CopilotChat.WebApi.Hubs;
 using CopilotChat.WebApi.Models.Request;
 using CopilotChat.WebApi.Models.Response;
@@ -25,6 +26,7 @@ using CopilotChat.WebApi.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
@@ -69,6 +71,26 @@ public class ChatController : ControllerBase, IDisposable
     }
 
     /// <summary>
+    /// Updates the semantic provider and kernel services
+    /// </summary>
+    /// <param name="kernel">Semantic kernel obtained through dependency injection.</param>
+    /// <param name="params">Request body parameters i.e. Azure OpenAI Deployment Name.</param>
+    /// <returns>Results containing the response from the model.</returns>
+    [Route("chats/updatekernelservices")]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateKernelService(
+        [FromServices] Kernel kernel,
+        [FromBody] KernelServiceParameters kp)
+    {
+        this._logger.LogDebug("Request received to update semantic kernel service.");
+
+        // SemanticKernelExtensions.ReplaceKernelServices();
+
+        return this.Ok(kernel);
+    }
+
+    /// <summary>
     /// Invokes the chat function to get a response from the bot.
     /// </summary>
     /// <param name="kernel">Semantic kernel obtained through dependency injection.</param>
@@ -87,13 +109,13 @@ public class ChatController : ControllerBase, IDisposable
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
     public async Task<IActionResult> ChatAsync(
-        [FromServices] Kernel kernel,
-        [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext,
-        [FromServices] ChatSessionRepository chatSessionRepository,
-        [FromServices] ChatParticipantRepository chatParticipantRepository,
-        [FromServices] IAuthInfo authInfo,
-        [FromBody] Ask ask,
-        [FromRoute] Guid chatId)
+    [FromServices] Kernel kernel,
+    [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext,
+    [FromServices] ChatSessionRepository chatSessionRepository,
+    [FromServices] ChatParticipantRepository chatParticipantRepository,
+    [FromServices] IAuthInfo authInfo,
+    [FromBody] Ask ask,
+    [FromRoute] Guid chatId)
     {
         this._logger.LogDebug("Chat message received.");
 
