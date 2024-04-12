@@ -16,25 +16,31 @@ export const useUserSettings = () => {
     const updateUserSettings = async (
         userId: string,
         darkMode: boolean,
-        plannersAndPersonas: boolean,
+        planners: boolean,
+        personas: boolean,
         simplifiedChatExperience: boolean,
         azureContentSafety: boolean,
         azureAISearch: boolean,
         exportChatSessions: boolean,
         liveChatSessionSharing: boolean,
         feedbackFromUser: boolean,
+        deploymentGPT35: boolean,
+        deploymentGPT4: boolean,
     ) => {
         try {
             return await userSettingsService.updateUserSettingsAsync(
                 userId,
                 darkMode,
-                plannersAndPersonas,
+                planners,
+                personas,
                 simplifiedChatExperience,
                 azureContentSafety,
                 azureAISearch,
                 exportChatSessions,
                 liveChatSessionSharing,
                 feedbackFromUser,
+                deploymentGPT35,
+                deploymentGPT4,
                 await AuthHelper.getSKaaSAccessToken(instance, inProgress),
             );
         } catch (e: any) {

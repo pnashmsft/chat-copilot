@@ -17,9 +17,9 @@ public sealed class SemanticKernelProvider
 {
     private readonly IKernelBuilder _builderChat;
 
-    public SemanticKernelProvider(IServiceProvider serviceProvider, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public SemanticKernelProvider(IServiceProvider serviceProvider, IConfiguration configuration, IHttpClientFactory httpClientFactory, string? deploymentName)
     {
-        this._builderChat = InitializeCompletionKernel(serviceProvider, configuration, httpClientFactory);
+        this._builderChat = InitializeCompletionKernel(serviceProvider, configuration, httpClientFactory, deploymentName);
     }
 
     /// <summary>
@@ -30,7 +30,8 @@ public sealed class SemanticKernelProvider
     private static IKernelBuilder InitializeCompletionKernel(
         IServiceProvider serviceProvider,
         IConfiguration configuration,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory,
+        string? deploymentName)
     {
         var builder = Kernel.CreateBuilder();
 
@@ -45,7 +46,7 @@ public sealed class SemanticKernelProvider
                 var azureAIOptions = memoryOptions.GetServiceConfig<AzureOpenAIConfig>(configuration, "AzureOpenAIText");
 #pragma warning disable CA2000 // No need to dispose of HttpClient instances from IHttpClientFactory
                 builder.AddAzureOpenAIChatCompletion(
-                    azureAIOptions.Deployment,
+                    (deploymentName != null) ? deploymentName : azureAIOptions.Deployment, // User can switch AI deployment name
                     azureAIOptions.Endpoint,
                     azureAIOptions.APIKey,
                     httpClient: httpClientFactory.CreateClient());

@@ -26,10 +26,16 @@ public class EditUserSettingsParameters
   public bool? darkMode { get; set; }
 
   /// <summary>
-  /// Planners and Personas enabled?
+  /// Planners enabled?
   /// </summary>
-  [JsonPropertyName("plannersAndPersonas")]
-  public bool? plannersAndPersonas { get; set; }
+  [JsonPropertyName("planners")]
+  public bool? planners { get; set; }
+
+  /// <summary>
+  /// Personas enabled?
+  /// </summary>
+  [JsonPropertyName("personas")]
+  public bool? personas { get; set; }
 
   /// <summary>
   /// Simplified Chat Experience?
@@ -67,4 +73,15 @@ public class EditUserSettingsParameters
   [JsonPropertyName("feedbackFromUser")]
   public bool? feedbackFromUser { get; set; }
 
+  /// <summary>
+  /// Azure OpenAI Deployment Name gpt-35-turbo
+  /// </summary>
+  [JsonPropertyName("deploymentGPT35")]
+  public bool? deploymentGPT35 { get; set; }
+
+  /// <summary>
+  /// Azure OpenAI Deployment Name gpt-4
+  /// </summary>
+  [JsonPropertyName("deploymentGPT4")]
+  public bool? deploymentGPT4 { get; set; }
 }

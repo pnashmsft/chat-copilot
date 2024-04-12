@@ -53,13 +53,16 @@ export interface Setting {
 
 export interface UserSettings {
     darkMode: boolean;
-    plannersAndPersonas: boolean;
+    planners: boolean;
+    personas: boolean;
     simplifiedChatExperience: boolean;
     azureContentSafety: boolean;
     azureAISearch: boolean;
     exportChatSessions: boolean;
     liveChatSessionSharing: boolean;
     feedbackFromUser: boolean;
+    deploymentGPT35: boolean;
+    deploymentGPT4: boolean;
 }
 
 export interface AppState {
@@ -78,7 +81,8 @@ export interface AppState {
 export enum FeatureKeys {
     DarkMode,
     SimplifiedExperience,
-    PluginsPlannersAndPersonas,
+    Planners,
+    Personas,
     AzureContentSafety,
     AzureAISearch,
     BotAsDocs,
@@ -86,6 +90,8 @@ export enum FeatureKeys {
     ExportChatSessions,
     LiveChatSessionSharing,
     RLHF, // Reinforcement Learning from Human Feedback
+    DeploymentGPT35,
+    DeploymentGPT4,
 }
 
 export const Features = {
@@ -99,10 +105,16 @@ export const Features = {
         label: 'Simplified Chat Experience',
         inactive: false,
     },
-    [FeatureKeys.PluginsPlannersAndPersonas]: {
+    [FeatureKeys.Planners]: {
         enabled: false,
-        label: 'Planners & Personas',
-        description: 'The Plans and Persona tabs are hidden until you turn this on',
+        label: 'Planners',
+        description: 'The Plans tab is hidden until you turn this on',
+        inactive: false,
+    },
+    [FeatureKeys.Personas]: {
+        enabled: false,
+        label: 'Personas',
+        description: 'The Persona tab is hidden until you turn this on',
         inactive: false,
     },
     [FeatureKeys.AzureContentSafety]: {
@@ -145,13 +157,23 @@ export const Features = {
         description: 'Enable users to vote on model-generated responses. For demonstration purposes only.',
         // TODO: [Issue #42] Send and store feedback in backend
     },
+    [FeatureKeys.DeploymentGPT35]: {
+        enabled: true,
+        label: 'gpt-35-turbo',
+        inactive: false,
+    },
+    [FeatureKeys.DeploymentGPT4]: {
+        enabled: false,
+        label: 'gpt-4',
+        inactive: false,
+    },
 };
 
 export const Settings = [
     {
         // Basic settings has to stay at the first index. Add all new settings to end of array.
         title: 'Basic',
-        features: [FeatureKeys.DarkMode, FeatureKeys.PluginsPlannersAndPersonas],
+        features: [FeatureKeys.DarkMode, FeatureKeys.Planners, FeatureKeys.Personas],
         stackVertically: true,
     },
     {
@@ -161,7 +183,12 @@ export const Settings = [
     },
     {
         title: 'Azure AI',
-        features: [FeatureKeys.AzureContentSafety, FeatureKeys.AzureAISearch],
+        features: [
+            FeatureKeys.AzureContentSafety,
+            FeatureKeys.AzureAISearch,
+            FeatureKeys.DeploymentGPT35,
+            FeatureKeys.DeploymentGPT4,
+        ],
         stackVertically: true,
     },
     {

@@ -7,25 +7,31 @@ export class UserSettingsService extends BaseService {
     public updateUserSettingsAsync = async (
         userId: string,
         darkMode: boolean,
-        plannersAndPersonas: boolean,
+        planners: boolean,
+        personas: boolean,
         simplifiedChatExperience: boolean,
         azureContentSafety: boolean,
         azureAISearch: boolean,
         exportChatSessions: boolean,
         liveChatSessionSharing: boolean,
         feedbackFromUser: boolean,
+        deploymentGPT35: boolean,
+        deploymentGPT4: boolean,
         accessToken: string,
     ): Promise<IUserSettings> => {
         const body = {
             userId,
             darkMode,
-            plannersAndPersonas,
+            planners,
+            personas,
             simplifiedChatExperience,
             azureContentSafety,
             azureAISearch,
             exportChatSessions,
             liveChatSessionSharing,
             feedbackFromUser,
+            deploymentGPT35,
+            deploymentGPT4,
         };
 
         const result = await this.getResponseAsync<IUserSettings>(
