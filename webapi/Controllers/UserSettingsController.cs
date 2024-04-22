@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CopilotChat.WebApi.Hubs;
 using CopilotChat.WebApi.Models.Request;
@@ -45,17 +47,35 @@ public class UserSettingsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserSettingsAsync(Guid userId)
     {
-        var settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
-
-        foreach (var setting in settings)
+        IEnumerable<UserSettings> settings;
+        try
         {
-            UserSettings us = new(setting.UserId, setting.DarkMode, setting.Planners, setting.Personas, setting.SimplifiedChatExperience,
-            setting.AzureContentSafety, setting.AzureAISearch, setting.ExportChatSessions, setting.LiveChatSessionSharing,
-            setting.FeedbackFromUser, setting.DeploymentGPT35, setting.DeploymentGPT4);
-            return this.Ok(us);  // Only 1 record per user id
+            try
+            {
+                settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
+            }
+            catch (Exception)
+            {
+                // No record found, create a new settings record for this user 
+                var newUserSettings = new UserSettings(userId.ToString(), false, false, false, true, true, false, false, false, true, true, false);
+                await this._userSettingsRepository.CreateAsync(newUserSettings);
+                return this.Ok(newUserSettings);  // Only 1 record per user id
+            }
+
+            foreach (var setting in settings)
+            {
+                UserSettings us = new(setting.UserId, setting.DarkMode, setting.Planners, setting.Personas, setting.SimplifiedChatExperience,
+                setting.AzureContentSafety, setting.AzureAISearch, setting.ExportChatSessions, setting.LiveChatSessionSharing,
+                setting.FeedbackFromUser, setting.DeploymentGPT35, setting.DeploymentGPT4);
+                return this.Ok(us);  // Only 1 record per user id
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex.ToString());
         }
 
-        return this.NotFound("Did not find any user specific settings.");
+        return this.NotFound(" Did not find any user specific settings.");
     }
 
     /// <summary>
@@ -102,6 +122,6 @@ public class UserSettingsController : ControllerBase
             return this.Ok(newUserSettings);
         }
 
-        return this.NotFound("User ID was not sent to update user settings'.");
+        return this.NotFound(" User ID was not sent to update user settings'.");
     }
 }
