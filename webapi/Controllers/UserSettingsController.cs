@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CopilotChat.WebApi.Hubs;
 using CopilotChat.WebApi.Models.Request;
@@ -50,12 +51,12 @@ public class UserSettingsController : ControllerBase
         IEnumerable<UserSettings> settings;
         try
         {
-            try
+            settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
+
+            if (!settings.OfType<UserSettings>().Any())
             {
-                settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
-            }
-            catch (Exception)
-            {
+                this._logger.LogDebug("No user settings record found.  Creating a default record");
+
                 // No record found, create a new settings record for this user 
                 var newUserSettings = new UserSettings(userId.ToString(), false, false, false, true, true, false, false, false, true, true, false);
                 await this._userSettingsRepository.CreateAsync(newUserSettings);
