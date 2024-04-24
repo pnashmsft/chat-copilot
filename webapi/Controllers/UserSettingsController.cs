@@ -58,7 +58,7 @@ public class UserSettingsController : ControllerBase
                 this._logger.LogDebug("No user settings record found.  Creating a default record");
 
                 // No record found, create a new settings record for this user 
-                var newUserSettings = new UserSettings(userId.ToString(), false, false, false, true, true, false, false, false, true, true, false);
+                UserSettings newUserSettings = new(userId.ToString(), false, false, false, true, true, false, false, false, true, true, false);
                 await this._userSettingsRepository.CreateAsync(newUserSettings);
                 return this.Ok(newUserSettings);  // Only 1 record per user id
             }
@@ -91,36 +91,48 @@ public class UserSettingsController : ControllerBase
         [FromBody] EditUserSettingsParameters msgParameters,
         [FromRoute] Guid userId)
     {
-        if (msgParameters.userId != null)
+        IEnumerable<UserSettings> settings;
+        try
         {
-            var settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
-
-            foreach (var setting in settings)
+            if (msgParameters.userId != null)
             {
-                // Update existing settings record for this user
-                setting!.DarkMode = msgParameters.darkMode;
-                setting!.Planners = msgParameters.planners;
-                setting!.Personas = msgParameters.personas;
-                setting!.SimplifiedChatExperience = msgParameters.simplifiedChatExperience;
-                setting!.AzureContentSafety = msgParameters.azureContentSafety;
-                setting!.AzureAISearch = msgParameters.azureAISearch;
-                setting!.ExportChatSessions = msgParameters.exportChatSessions;
-                setting!.LiveChatSessionSharing = msgParameters.liveChatSessionSharing;
-                setting!.FeedbackFromUser = msgParameters.feedbackFromUser;
-                setting!.DeploymentGPT35 = msgParameters.deploymentGPT35;
-                setting!.DeploymentGPT4 = msgParameters.deploymentGPT4;
-                await this._userSettingsRepository.UpsertAsync(setting);
+                settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
 
-                return this.Ok(setting);
+                if (!settings.OfType<UserSettings>().Any())
+                {
+                    this._logger.LogDebug("No user settings record found.  Creating a default record");
+
+                    // Create a new settings record for this user 
+                    UserSettings newUserSettings = new(msgParameters.userId, msgParameters.darkMode, msgParameters.planners, msgParameters.personas,
+                    msgParameters.simplifiedChatExperience, msgParameters.azureContentSafety, msgParameters.azureAISearch, msgParameters.exportChatSessions,
+                    msgParameters.liveChatSessionSharing, msgParameters.feedbackFromUser, msgParameters.deploymentGPT35, msgParameters.deploymentGPT4);
+                    await this._userSettingsRepository.CreateAsync(newUserSettings);
+                    return this.Ok(newUserSettings);
+                }
+
+                foreach (var setting in settings)
+                {
+                    // Update existing settings record for this user
+                    setting!.DarkMode = msgParameters.darkMode;
+                    setting!.Planners = msgParameters.planners;
+                    setting!.Personas = msgParameters.personas;
+                    setting!.SimplifiedChatExperience = msgParameters.simplifiedChatExperience;
+                    setting!.AzureContentSafety = msgParameters.azureContentSafety;
+                    setting!.AzureAISearch = msgParameters.azureAISearch;
+                    setting!.ExportChatSessions = msgParameters.exportChatSessions;
+                    setting!.LiveChatSessionSharing = msgParameters.liveChatSessionSharing;
+                    setting!.FeedbackFromUser = msgParameters.feedbackFromUser;
+                    setting!.DeploymentGPT35 = msgParameters.deploymentGPT35;
+                    setting!.DeploymentGPT4 = msgParameters.deploymentGPT4;
+                    await this._userSettingsRepository.UpsertAsync(setting);
+
+                    return this.Ok(setting);
+                }
             }
-
-            // Create a new settings record for this user 
-            var newUserSettings = new UserSettings(msgParameters.userId, msgParameters.darkMode, msgParameters.planners, msgParameters.personas,
-            msgParameters.simplifiedChatExperience, msgParameters.azureContentSafety, msgParameters.azureAISearch, msgParameters.exportChatSessions,
-            msgParameters.liveChatSessionSharing, msgParameters.feedbackFromUser, msgParameters.deploymentGPT35, msgParameters.deploymentGPT4);
-            await this._userSettingsRepository.CreateAsync(newUserSettings);
-
-            return this.Ok(newUserSettings);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex.ToString());
         }
 
         return this.NotFound(" User ID was not sent to update user settings'.");
