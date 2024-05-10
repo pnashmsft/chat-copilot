@@ -130,7 +130,7 @@ export function renderApp() {
                 toggleFeatureState({
                     feature: FeatureKeys.DeploymentGPT35,
                     deactivate: lockControl,
-                    enable: true,
+                    enable: false,
                 }),
             );
 

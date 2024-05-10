@@ -158,7 +158,7 @@ export const Features = {
         // TODO: [Issue #42] Send and store feedback in backend
     },
     [FeatureKeys.DeploymentGPT35]: {
-        enabled: true,
+        enabled: false,
         label: 'gpt-35-turbo',
         inactive: false,
     },
