@@ -115,7 +115,7 @@ const App = () => {
                 }
 
                 setAppState(AppState.UserSettings);
-                void userSettingsHandler.getUserSettings(account.localAccountId).then((us) => {
+                void userSettingsHandler.getUserSettings(account.homeAccountId).then((us) => {
                     if (us !== undefined) {
                         dispatch(setUserSettings(us));
                         if (us.darkMode) dispatch(toggleFeatureFlag(FeatureKeys.DarkMode)); // Turn on

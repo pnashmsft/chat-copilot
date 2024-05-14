@@ -43,27 +43,27 @@ public class UserSettingsController : ControllerBase
     /// </summary>
     /// <param name="userId">The user id to retrieve settings for.</param>
     [HttpGet]
-    [Route("settings/{userId:guid}")]
+    [Route("settings/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserSettingsAsync([FromRoute] Guid userId)
+    public async Task<IActionResult> GetUserSettingsAsync([FromRoute] string userId)
     {
         IEnumerable<UserSettings> settings;
         try
         {
-            settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
+            settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId);
 
             if (!settings.OfType<UserSettings>().Any())
             {
-                this._logger.LogDebug("No user settings record found for {0}.  Creating a default record", userId.ToString());
+                this._logger.LogDebug("No user settings record found for {0}.  Creating a default record", userId);
 
                 // No record found, create a new settings record for this user 
-                UserSettings newUserSettings = new(userId.ToString(), false, false, false, true, true, false, false, false, true, true, false);
+                UserSettings newUserSettings = new(userId, false, false, false, true, true, false, false, false, true, true, false);
                 await this._userSettingsRepository.CreateAsync(newUserSettings);
                 return this.Ok(newUserSettings);  // Only 1 record per user id
             }
 
-            this._logger.LogDebug("User settings record found for: {0}", userId.ToString());
+            this._logger.LogDebug("User settings record found for: {0}", userId);
             foreach (var setting in settings)
             {
                 UserSettings us = new(setting.UserId, setting.DarkMode, setting.Planners, setting.Personas, setting.SimplifiedChatExperience,
@@ -77,7 +77,7 @@ public class UserSettingsController : ControllerBase
             this._logger.LogError("GetUserSettingsAsync() exception: {0}", ex.ToString());
         }
 
-        return this.NotFound(" Did not find any user specific settings for: " + userId.ToString());
+        return this.NotFound(" Did not find any user specific settings for: " + userId);
     }
 
     /// <summary>
@@ -85,31 +85,31 @@ public class UserSettingsController : ControllerBase
     /// </summary>
     /// <param name="msgParameters">Params to update settings.</param>
     [HttpPost]
-    [Route("settings/{userId:guid}")]
+    [Route("settings/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateUserSettingsAsync(
         [FromBody] EditUserSettingsParameters msgParameters,
-        [FromRoute] Guid userId)
+        [FromRoute] string userId)
     {
         IEnumerable<UserSettings> settings;
         try
         {
-            settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId.ToString());
+            settings = await this._userSettingsRepository.FindSettingsByUserIdAsync(userId);
 
             if (!settings.OfType<UserSettings>().Any())
             {
-                this._logger.LogDebug("No user settings record found for {0}.  Creating a default record", userId.ToString());
+                this._logger.LogDebug("No user settings record found for {0}.  Creating a default record", userId);
 
                 // Create a new settings record for this user 
-                UserSettings newUserSettings = new(userId.ToString(), msgParameters.darkMode, msgParameters.planners, msgParameters.personas,
+                UserSettings newUserSettings = new(userId, msgParameters.darkMode, msgParameters.planners, msgParameters.personas,
                 msgParameters.simplifiedChatExperience, msgParameters.azureContentSafety, msgParameters.azureAISearch, msgParameters.exportChatSessions,
                 msgParameters.liveChatSessionSharing, msgParameters.feedbackFromUser, msgParameters.deploymentGPT35, msgParameters.deploymentGPT4);
                 await this._userSettingsRepository.CreateAsync(newUserSettings);
                 return this.Ok(newUserSettings);
             }
 
-            this._logger.LogDebug("User settings record found for: {0}", userId.ToString());
+            this._logger.LogDebug("User settings record found for: {0}", userId);
             foreach (var setting in settings)
             {
                 // Update existing settings record for this user
@@ -134,6 +134,6 @@ public class UserSettingsController : ControllerBase
             this._logger.LogError("UpdateUserSettingsAsync() exception: {0}", ex.ToString());
         }
 
-        return this.NotFound(" Unable to update user settings for: " + userId.ToString());
+        return this.NotFound(" Unable to update user settings for: " + userId);
     }
 }

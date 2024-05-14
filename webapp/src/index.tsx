@@ -144,15 +144,21 @@ export function renderApp() {
 
             fetch(new URL('authConfig', BackendServiceUrl))
                 .then((response) => (response.ok ? (response.json() as Promise<AuthConfig>) : Promise.reject()))
-                .then((authConfig) => {
+                .then(async (authConfig) => {
                     store.dispatch(setAuthConfig(authConfig));
 
                     if (AuthHelper.isAuthAAD()) {
                         if (!msalInstance) {
                             msalInstance = new PublicClientApplication(AuthHelper.getMsalConfig(authConfig));
-                            void msalInstance.handleRedirectPromise().then((response) => {
+                            await msalInstance.initialize();
+                            await msalInstance.handleRedirectPromise().then((response) => {
                                 if (response) {
                                     msalInstance?.setActiveAccount(response.account);
+                                } else {
+                                    const activeAccount = msalInstance?.getAllAccounts()[0];
+                                    if (activeAccount) {
+                                        msalInstance?.setActiveAccount(activeAccount);
+                                    }
                                 }
                             });
                         }
