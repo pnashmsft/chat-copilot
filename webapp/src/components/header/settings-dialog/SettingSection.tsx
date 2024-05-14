@@ -84,7 +84,6 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
                 {setting.features.map((key) => {
                     const feature = features[key];
                     const disableControl = !!feature.inactive;
-                    console.debug('Disable Settings Controls? ' + disableControl);
 
                     return (
                         <div key={key} className={classes.feature}>
