@@ -37,7 +37,7 @@ export class UserSettingsService extends BaseService {
         const result = await this.getResponseAsync<IUserSettings>(
             {
                 commandPath: `settings/${userId}`,
-                method: 'PATCH',
+                method: 'POST',
                 body,
             },
             accessToken,

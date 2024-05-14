@@ -84,7 +84,7 @@ public class UserSettingsController : ControllerBase
     /// Update user settings.
     /// </summary>
     /// <param name="msgParameters">Params to update settings.</param>
-    [HttpPatch]
+    [HttpPost]
     [Route("settings/{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
