@@ -188,19 +188,20 @@ internal static class SemanticKernelExtensions
 
     private static async Task<UserSettings?> RetrieveUserSettings(IServiceProvider sp)
     {
-        var auth = sp.GetService<IAuthInfo>();
-        UserSettingsRepository userSettingsRepo = sp.GetService<UserSettingsRepository>();
-
         string userID = "";
-        if (auth != null)
+
+        try
         {
+            var auth = sp.GetService<IAuthInfo>();
+
             userID = auth.UserId;
         }
-        else
+        catch (Exception)
         {
             userID = "c05c61eb-65e4-4223-915a-fe72b0c9ece1"; // Default user
         }
 
+        UserSettingsRepository userSettingsRepo = sp.GetService<UserSettingsRepository>();
         IEnumerable<UserSettings> settings = await userSettingsRepo.FindSettingsByUserIdAsync(userID);
 
         foreach (var setting in settings)
