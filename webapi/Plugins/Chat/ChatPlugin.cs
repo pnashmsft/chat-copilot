@@ -643,7 +643,7 @@ public class ChatPlugin
         IEnumerable<CitationSource>? citations = null)
     {
         // Create the stream
-        var chatCompletion = this._kernel.GetRequiredService<IChatCompletionService>(deploymentName);
+        var chatCompletion = this._kernel.GetRequiredService<IChatCompletionService>();
         var stream =
             chatCompletion.GetStreamingChatMessageContentsAsync(
                 prompt.MetaPromptTemplate,
