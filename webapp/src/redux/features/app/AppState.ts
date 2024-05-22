@@ -183,18 +183,19 @@ export const Settings = [
     },
     {
         title: 'Azure AI',
-        features: [
-            FeatureKeys.AzureContentSafety,
-            FeatureKeys.AzureAISearch,
-            FeatureKeys.DeploymentGPT35,
-            FeatureKeys.DeploymentGPT4,
-        ],
+        features: [FeatureKeys.AzureContentSafety, FeatureKeys.AzureAISearch],
         stackVertically: true,
     },
     {
         title: 'Experimental',
         description: 'The related icons and menu options are hidden until you turn this on',
-        features: [FeatureKeys.BotAsDocs, FeatureKeys.MultiUserChat, FeatureKeys.RLHF],
+        features: [
+            FeatureKeys.BotAsDocs,
+            FeatureKeys.MultiUserChat,
+            FeatureKeys.RLHF,
+            FeatureKeys.DeploymentGPT35,
+            FeatureKeys.DeploymentGPT4,
+        ],
     },
 ];
 

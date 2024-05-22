@@ -86,29 +86,34 @@ export const SettingSection: React.FC<ISettingsSectionProps> = ({ setting, conte
                     const disableControl = !!feature.inactive;
 
                     return (
-                        <div key={key} className={classes.feature}>
-                            <Switch
-                                label={feature.label}
-                                checked={feature.enabled}
-                                disabled={
-                                    disableControl || (key === FeatureKeys.MultiUserChat && !AuthHelper.isAuthAAD())
-                                }
-                                onChange={() => {
-                                    onFeatureChange(key);
-                                }}
-                                data-testid={feature.label}
-                            />
-                            <Text
-                                className={classes.featureDescription}
-                                style={{
-                                    color: disableControl
-                                        ? tokens.colorNeutralForegroundDisabled
-                                        : tokens.colorNeutralForeground2,
-                                }}
-                            >
-                                {feature.description}
-                            </Text>
-                        </div>
+                        <>
+                            {key !== FeatureKeys.DeploymentGPT35 && key !== FeatureKeys.DeploymentGPT4 && (
+                                <div key={key} className={classes.feature}>
+                                    <Switch
+                                        label={feature.label}
+                                        checked={feature.enabled}
+                                        disabled={
+                                            disableControl ||
+                                            (key === FeatureKeys.MultiUserChat && !AuthHelper.isAuthAAD())
+                                        }
+                                        onChange={() => {
+                                            onFeatureChange(key);
+                                        }}
+                                        data-testid={feature.label}
+                                    />
+                                    <Text
+                                        className={classes.featureDescription}
+                                        style={{
+                                            color: disableControl
+                                                ? tokens.colorNeutralForegroundDisabled
+                                                : tokens.colorNeutralForeground2,
+                                        }}
+                                    >
+                                        {feature.description}
+                                    </Text>
+                                </div>
+                            )}
+                        </>
                     );
                 })}
             </div>

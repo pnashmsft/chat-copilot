@@ -79,6 +79,7 @@ internal static class SemanticKernelExtensions
                     }
                 }
 
+                deploymentName = null; // For now, keep null until switcher tested fully
                 var kernel = provider.GetCompletionKernel(deploymentName);
 
                 sp.GetRequiredService<RegisterFunctionsWithKernel>()(sp, kernel);
