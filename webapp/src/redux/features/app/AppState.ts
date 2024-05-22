@@ -151,7 +151,7 @@ export const Features = {
         description: 'Enable chat session sharing.',
     },
     [FeatureKeys.RLHF]: {
-        enabled: false,
+        enabled: true,
         label: 'Reinforcement Learning from Human Feedback',
         inactive: false,
         description: 'Enable users to vote on model-generated responses. For demonstration purposes only.',
