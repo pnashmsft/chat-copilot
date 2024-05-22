@@ -160,12 +160,12 @@ export const Features = {
     [FeatureKeys.DeploymentGPT35]: {
         enabled: false,
         label: 'gpt-35-turbo',
-        inactive: false,
+        inactive: true,
     },
     [FeatureKeys.DeploymentGPT4]: {
         enabled: false,
         label: 'gpt-4',
-        inactive: false,
+        inactive: true,
     },
 };
 
